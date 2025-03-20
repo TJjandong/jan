@@ -7,6 +7,7 @@
 #include "Characters.hpp"
 #include "PhaseResourceManger.hpp"
 #include "AnimatedCharacter.hpp"
+#include "Main_Character.hpp"
 
 class App {
 public:
@@ -55,7 +56,7 @@ private:
 
     Util::Renderer m_Root;
 
-    std::shared_ptr<Characters> m_madline;
+    std::shared_ptr<MainCharacter> m_madline;
     std::shared_ptr<Characters> m_bounce;
     std::shared_ptr<Characters> m_cloud;
     std::shared_ptr<Characters> m_box;

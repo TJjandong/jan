@@ -36,6 +36,8 @@ add_executable(${PROJECT_NAME}
     ${SRC_FILES}
     ${HEADER_FILES}
         src/Characters.cpp
+        src/MainCharacter.cpp
+        include/Main_Character.hpp
 )
 
 if(MSVC)

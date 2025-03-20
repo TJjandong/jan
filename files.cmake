@@ -4,6 +4,7 @@ set(SRC_FILES
         AnimatedCharacter.cpp
         Characters.cpp
         main.cpp
+        MainCharacter.cpp
 )
 
 set(INCLUDE_FILES
@@ -12,6 +13,7 @@ set(INCLUDE_FILES
         BackgroundImage.hpp
         Characters.hpp
         PhaseResourceManger.hpp
+        Main_Character.hpp
 )
 
 set(TEST_FILES

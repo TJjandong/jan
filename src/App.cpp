@@ -9,7 +9,7 @@ void App::Start() {
     LOG_TRACE("Start");
 
     // 設置角色圖片
-    m_madline = std::make_shared<Characters>(GA_RESOURCE_DIR "CharacterImg/standR.png");
+    m_madline = std::make_shared<MainCharacter>(GA_RESOURCE_DIR "CharacterImg/standR.png");
     m_madline->SetPosition({100.0f, 100.0f});  // 確保角色在可見範圍
     m_madline->SetZIndex(100);  // 設置角色在頂層
     m_Root.AddChild(m_madline);  // 添加角色到根物件
@@ -29,29 +29,7 @@ void App::Update() {
     m_Root.Update();
     m_madline->Draw();
 
-    if (Util::Input::IsKeyPressed(Util::Keycode::RIGHT)) {
-        glm::vec2 currentPos = m_madline->GetPosition(); // 獲取長頸鹿位置
-        currentPos.x += 3.0f;                            // 調整數值控制移動速度
-        m_madline->SetPosition(currentPos);              // 更新長頸鹿的位置
-    }
-
-    if (Util::Input::IsKeyPressed(Util::Keycode::LEFT)) {
-        glm::vec2 currentPos = m_madline->GetPosition(); // 獲取當前位置
-        currentPos.x -= 3.0f; // 調整這個數值來控制移動速度
-        m_madline->SetPosition(currentPos); // 更新長頸鹿的位置
-    }
-
-    if (Util::Input::IsKeyPressed(Util::Keycode::UP)) {
-        glm::vec2 currentPos = m_madline->GetPosition(); // 獲取當前位置
-        currentPos.y += 3.0f; // 調整這個數值來控制移動速度
-        m_madline->SetPosition(currentPos); // 更新長頸鹿的位置
-    }
-
-    if (Util::Input::IsKeyPressed(Util::Keycode::DOWN)) {
-        glm::vec2 currentPos = m_madline->GetPosition(); // 獲取當前位置
-        currentPos.y -= 3.0f; // 調整這個數值來控制移動速度
-        m_madline->SetPosition(currentPos); // 更新長頸鹿的位置
-    }
+    m_madline->movement();
     /*
      * Do not touch the code below as they serve the purpose for
      * closing the window.
