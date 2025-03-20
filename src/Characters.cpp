@@ -27,6 +27,12 @@ void Characters::SetScale(float scaleX, float scaleY) {
     m_Transform.scale = {scaleX, scaleY};
 }
 
+void Characters::SetCoordinate(const glm::vec2& Coordinate) {
+    m_Transform.translation = Coordinate;
+    m_Position.x = (m_Transform.translation.x + 350) / 5.0f;
+    m_Position.y = (m_Transform.translation.y + 350) / 5.0f;
+}
+
 bool Characters::IfCollides(const std::shared_ptr<Characters>& other) const {
     // Get the position and scale of this character
     glm::vec2 thisPos = m_Transform.translation;
@@ -34,7 +40,7 @@ bool Characters::IfCollides(const std::shared_ptr<Characters>& other) const {
     float thisHeight = m_Transform.scale.y; // Assuming scale.y represents height
 
     // Get the position and scale of the other character
-    glm::vec2 otherPos = other->GetPosition();
+    glm::vec2 otherPos = other->GetCoordinate();
     float otherWidth = other->m_Transform.scale.x;  // Assuming scale.x represents width
     float otherHeight = other->m_Transform.scale.y; // Assuming scale.y represents height
 
@@ -43,4 +49,4 @@ bool Characters::IfCollides(const std::shared_ptr<Characters>& other) const {
     bool overlapY = thisPos.y < otherPos.y + otherHeight && thisPos.y + thisHeight > otherPos.y;
 
     return overlapX && overlapY; // If both X and Y overlap, a collision occurred
-}
+}               //應該需要再改進
