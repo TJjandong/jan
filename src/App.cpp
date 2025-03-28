@@ -21,7 +21,7 @@ void App::Start() {
 
     // 設置背景
     m_PRM = std::make_shared<PhaseResourceManger>();  // 加載背景等
-    m_PRM->SetWall(1);
+    m_PRM->SetWall(0);
     m_Root.AddChildren(m_PRM->GetChildren());  // 添加背景
 
     m_CurrentState = State::UPDATE;

@@ -79,8 +79,8 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
 
 int MainCharacter::IfCollidesWall(const std::vector<std::shared_ptr<Util::GameObject>>& walls) const {
     // 主角的碰撞矩形
-    glm::vec2 posA = GetCoordinate();  // 主角左上角的像素座標
-    glm::vec2 sizeA = {36,36}; // 主角的寬與高
+    glm::vec2 posA = GetCoordinate() + glm::vec2{0, 10};  // 主角左上角的像素座標
+    glm::vec2 sizeA = {30,27}; // 主角的寬與高
 
     // 逐一檢查每一個牆壁
     for (const auto& wallObj : walls) {
