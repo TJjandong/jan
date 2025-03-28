@@ -51,10 +51,11 @@ private:
         Phase19,
         Phase20
     };
-private:
+
     State m_CurrentState = State::START;
 
     Util::Renderer m_Root;
+    Phase m_Phase = Phase::Phase00;
 
     std::shared_ptr<MainCharacter> m_madline;
     std::shared_ptr<Characters> m_bounce;

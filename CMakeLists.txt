@@ -38,6 +38,8 @@ add_executable(${PROJECT_NAME}
         src/Characters.cpp
         src/MainCharacter.cpp
         include/Main_Character.hpp
+        include/AppUtil.hpp
+        include/InvisibleWall.hpp
 )
 
 if(MSVC)

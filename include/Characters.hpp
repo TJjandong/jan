@@ -30,8 +30,7 @@ public:
 
     void SetCoordinate(const glm::vec2& Coordinate);
 
-    // TODO: Implement the collision detection
-    bool IfCollides(const std::shared_ptr<Characters>& other) const;
+    bool IfCollidesChracter(const std::shared_ptr<Characters>& other) const;
 
     // TODO: Add and implement more methods and properties as needed to finish Giraffe Adventure.
     void SetScale(float scaleX, float scaleY);
@@ -42,7 +41,7 @@ private:
     void ResetPosition() { m_Transform.translation = {0, 0}; }
 
     std::string m_ImagePath;
-    glm::vec2 m_Position{ (m_Transform.translation.x + 350) / 5.0f , (m_Transform.translation.y + 350) / 5.0f };  // 存儲位置數據
+    glm::vec2 m_Position{ (m_Transform.translation.x + 384) / 6.0f , (m_Transform.translation.y + 384) / 6.0f };  // 存儲位置數據
 };
 
 #endif
