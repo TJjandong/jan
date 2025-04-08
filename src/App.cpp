@@ -46,10 +46,10 @@ void App::Update() {
     m_madline->movement(m_PRM->GetWall());
 
     // 假設你在 PhaseResourceManger 中另外提供 GetWalls() 方法，只回傳牆壁 vector
-    if (m_madline->IfCollidesWall(m_PRM->GetWall())) {
+    /*if (m_madline->IfCollidesWall(m_PRM->GetWall())) {
         // 處理碰撞，例如停止移動或回復到上一步
         std::cout << "主角與隱形牆發生碰撞！" << std::endl;
-    }
+    }*/
 
     /*
      * Do not touch the code below as they serve the purpose for

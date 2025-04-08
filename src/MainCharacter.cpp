@@ -5,46 +5,47 @@
 #include <iostream>
 #include <cmath>
 
-
-
 void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>>& walls) {
-    // 先記錄上一個安全位置
+    // 先記錄原始安全位置
     glm::vec2 oldPos = GetCoordinate();
 
-    const float max_speed = 5.0f;     // 設定最大速度
-    const float acceleration = 4.0f;  // 設定加速度
-    const float friction = 4.0f;      // 設定摩擦力（減速值）
+    const float max_speed = 5.0f;
+    const float acceleration = 4.0f;
+    const float friction = 4.0f;
 
-    // 依照輸入更新速度（這部分保持不變）
+    CollisionFlags flags;
+    DetectSideCollisions(walls, flags);  // 初次偵測
+
+    // 更新水平方向速度
     if (Util::Input::IsKeyPressed(Util::Keycode::RIGHT)) {
-        if (IfCollidesWall(walls) != CollidedWall::Right) {
+        if (!flags.right) {  // 如果右側沒有碰撞
             velocity_x += acceleration;
             if (velocity_x > max_speed)
                 velocity_x = max_speed;
         }
     } else if (Util::Input::IsKeyPressed(Util::Keycode::LEFT)) {
-        if (IfCollidesWall(walls) != CollidedWall::Left) {
+        if (!flags.left) {   // 如果左側沒有碰撞
             velocity_x -= acceleration;
             if (velocity_x < -max_speed)
                 velocity_x = -max_speed;
         }
     }
+    // 更新垂直方向速度
     if (Util::Input::IsKeyPressed(Util::Keycode::UP)) {
-        if (IfCollidesWall(walls) != CollidedWall::Up) {
+        if (!flags.up) {     // 如果上方沒有碰撞
             velocity_y += acceleration;
             if (velocity_y > max_speed)
                 velocity_y = max_speed;
         }
-    }
-    if (Util::Input::IsKeyPressed(Util::Keycode::DOWN)) {
-        if (IfCollidesWall(walls) != CollidedWall::Down) {
+    } else if (Util::Input::IsKeyPressed(Util::Keycode::DOWN)) {
+        if (!flags.down) {   // 如果下方沒有碰撞
             velocity_y -= acceleration;
             if (velocity_y < -max_speed)
                 velocity_y = -max_speed;
         }
     }
 
-    // 如果沒有按鍵，施加摩擦力
+    // 當沒有水平按鍵時施加摩擦
     if (!Util::Input::IsKeyPressed(Util::Keycode::RIGHT) && !Util::Input::IsKeyPressed(Util::Keycode::LEFT)) {
         if (velocity_x > 0) {
             velocity_x -= friction;
@@ -54,6 +55,7 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
             if (velocity_x > 0) velocity_x = 0;
         }
     }
+    // 當沒有垂直按鍵時施加摩擦
     if (!Util::Input::IsKeyPressed(Util::Keycode::UP) && !Util::Input::IsKeyPressed(Util::Keycode::DOWN)) {
         if (velocity_y > 0) {
             velocity_y -= friction;
@@ -64,70 +66,85 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
         }
     }
 
-    // 計算新的位置
-    glm::vec2 newPos = oldPos + glm::vec2(velocity_x, velocity_y);
-    SetCoordinate(newPos);
+    // 分別檢查水平與垂直碰撞
+    glm::vec2 newPos = oldPos;   // 從原始位置開始計算
 
-    // 如果新位置發生碰撞，回復到舊位置並清零速度
-    if (IfCollidesWall(walls) != CollidedWall::None) {
-        SetCoordinate(oldPos);
-        velocity_x = 0;
-        velocity_y = 0;
+    // 先更新水平方向
+    newPos.x += velocity_x;
+    // 對水平移動進行碰撞檢測（僅關注左右）
+    {
+        // 先儲存原始水平位置
+        glm::vec2 testPos = newPos; // 水平移動後的暫時位置
+        SetCoordinate({testPos.x, oldPos.y}); // 只更新水平部分
+        CollisionFlags horizontalFlags;
+        DetectSideCollisions(walls, horizontalFlags);
+        if (horizontalFlags.left || horizontalFlags.right) {
+            // 若有水平方向碰撞，回復水平位置
+            newPos.x = oldPos.x;
+            velocity_x = 0;
+        }
     }
+
+    // 接著更新垂直方向
+    newPos.y += velocity_y;
+    {
+        glm::vec2 testPos = newPos;
+        SetCoordinate({newPos.x, testPos.y}); // 只更新垂直部分
+        CollisionFlags verticalFlags;
+        DetectSideCollisions(walls, verticalFlags);
+        if (verticalFlags.up || verticalFlags.down) {
+            newPos.y = oldPos.y;
+            velocity_y = 0;
+        }
+    }
+
+    // 最終設定角色座標
+    SetCoordinate(newPos);
 }
 
 
-int MainCharacter::IfCollidesWall(const std::vector<std::shared_ptr<Util::GameObject>>& walls) const {
-    // 主角的碰撞矩形
-    glm::vec2 posA = GetCoordinate() + glm::vec2{0, 10};  // 主角左上角的像素座標
-    glm::vec2 sizeA = {30,27}; // 主角的寬與高
+void MainCharacter::DetectSideCollisions(const std::vector<std::shared_ptr<Util::GameObject>> &walls, CollisionFlags &flags) const {
+    // 清空標旗
+    flags.left = flags.right = flags.up = flags.down = false;
 
-    // 逐一檢查每一個牆壁
-    for (const auto& wallObj : walls) {
-        // 嘗試將牆壁物件轉成 Characters（或 InvisibleWall）
+    // 取得主角碰撞矩形，這裡假設主角尺寸是 {30,27}
+    glm::vec2 posA = GetCoordinate() + glm::vec2{0, 10};
+    glm::vec2 sizeA = {30, 27};
+    const float eps = 1.0f; // 偵測厚度
+
+    // 定義各邊的區域
+    glm::vec2 leftRectPos   = { posA.x - eps, posA.y };
+    glm::vec2 leftRectSize  = { eps, sizeA.y };
+
+    glm::vec2 rightRectPos  = { posA.x + sizeA.x, posA.y };
+    glm::vec2 rightRectSize = { eps, sizeA.y };
+
+    glm::vec2 upRectPos     = { posA.x, posA.y - eps };
+    glm::vec2 upRectSize    = { sizeA.x, eps };
+
+    glm::vec2 downRectPos   = { posA.x, posA.y + sizeA.y };
+    glm::vec2 downRectSize  = { sizeA.x, eps };
+
+    // 檢查每個牆壁
+    for (const auto &wallObj : walls) {
         auto wall = std::dynamic_pointer_cast<Characters>(wallObj);
         if (wall) {
-            glm::vec2 posB = wall->GetCoordinate();  // 牆壁左上角
-            glm::vec2 sizeB = wall->m_Transform.scale; // 牆壁的寬與高
-
-            // 檢查 AABB 是否重疊
-            bool overlapX = posA.x < posB.x + sizeB.x && posA.x + sizeA.x > posB.x;
-            bool overlapY = posA.y < posB.y + sizeB.y && posA.y + sizeA.y > posB.y;
-            if (overlapX && overlapY) {
-                // 計算各自中心點
-                glm::vec2 centerA = posA + sizeA * 0.5f;
-                glm::vec2 centerB = posB + sizeB * 0.5f;
-                float deltaX = centerA.x - centerB.x;
-                float deltaY = centerA.y - centerB.y;
-                // 合併半寬與半高
-                float combinedHalfWidth = (sizeA.x + sizeB.x) * 0.5f;
-                float combinedHalfHeight = (sizeA.y + sizeB.y) * 0.5f;
-                // 計算重疊距離（穿透量）
-                float overlapAmountX = combinedHalfWidth - std::fabs(deltaX);
-                float overlapAmountY = combinedHalfHeight - std::fabs(deltaY);
-
-                // 判斷哪一軸的穿透量較小，即碰撞面
-                if (overlapAmountX < overlapAmountY) {
-                    // 水平碰撞
-                    if (deltaX > 0) {
-                        // 主角中心在牆壁右側，表示碰撞在主角左側
-                        return CollidedWall::Left;
-                    } else {
-                        // 主角中心在牆壁左側，表示碰撞在主角右側
-                        return CollidedWall::Right;
-                    }
-                } else {
-                    // 垂直碰撞
-                    if (deltaY > 0) {
-                        // 主角中心在牆壁下方，表示碰撞在主角上方
-                        return CollidedWall::Down;
-                    } else {
-                        // 主角中心在牆壁上方，表示碰撞在主角下方
-                        return CollidedWall::Up;
-                    }
-                }
-            }
+            glm::vec2 posB = wall->GetCoordinate();
+            glm::vec2 sizeB = wall->m_Transform.scale;  // 牆壁尺寸
+            if (RectOverlap(leftRectPos, leftRectSize, posB, sizeB))
+                flags.left = true;
+            if (RectOverlap(rightRectPos, rightRectSize, posB, sizeB))
+                flags.right = true;
+            if (RectOverlap(upRectPos, upRectSize, posB, sizeB))
+                flags.up = true;
+            if (RectOverlap(downRectPos, downRectSize, posB, sizeB))
+                flags.down = true;
         }
     }
-    return CollidedWall::None;
+}
+
+bool MainCharacter::RectOverlap(const glm::vec2 &a, const glm::vec2 &sizeA,
+                                  const glm::vec2 &b, const glm::vec2 &sizeB) {
+    return (a.x < b.x + sizeB.x && a.x + sizeA.x > b.x &&
+            a.y < b.y + sizeB.y && a.y + sizeA.y > b.y);
 }
