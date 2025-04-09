@@ -6,47 +6,31 @@
 #include <cmath>
 
 void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>>& walls) {
-    // 先記錄原始安全位置
+    // 儲存原始位置
     glm::vec2 oldPos = GetCoordinate();
 
+    // 定義移動與物理參數
     const float max_speed = 5.0f;
     const float acceleration = 4.0f;
     const float friction = 4.0f;
+    const float Jumpforce = 60.0f;         // 跳躍時的初速度大小
+    const float Gravity = 0.5f;            // 重力加速度，每幀施加
+    const float max_fall_speed = -max_speed * 1.5f;  // 限制垂直下落速度
 
     CollisionFlags flags;
-    DetectSideCollisions(walls, flags);  // 初次偵測
+    DetectSideCollisions(walls, flags);
 
-    // 更新水平方向速度
+    // 處理水平移動
     if (Util::Input::IsKeyPressed(Util::Keycode::RIGHT)) {
-        if (!flags.right) {  // 如果右側沒有碰撞
-            velocity_x += acceleration;
-            if (velocity_x > max_speed)
-                velocity_x = max_speed;
-        }
+        velocity_x += acceleration;
+        if (velocity_x > max_speed)
+            velocity_x = max_speed;
     } else if (Util::Input::IsKeyPressed(Util::Keycode::LEFT)) {
-        if (!flags.left) {   // 如果左側沒有碰撞
-            velocity_x -= acceleration;
-            if (velocity_x < -max_speed)
-                velocity_x = -max_speed;
-        }
-    }
-    // 更新垂直方向速度
-    if (Util::Input::IsKeyPressed(Util::Keycode::UP)) {
-        if (!flags.up) {     // 如果上方沒有碰撞
-            velocity_y += acceleration;
-            if (velocity_y > max_speed)
-                velocity_y = max_speed;
-        }
-    } else if (Util::Input::IsKeyPressed(Util::Keycode::DOWN)) {
-        if (!flags.down) {   // 如果下方沒有碰撞
-            velocity_y -= acceleration;
-            if (velocity_y < -max_speed)
-                velocity_y = -max_speed;
-        }
-    }
-
-    // 當沒有水平按鍵時施加摩擦
-    if (!Util::Input::IsKeyPressed(Util::Keycode::RIGHT) && !Util::Input::IsKeyPressed(Util::Keycode::LEFT)) {
+        velocity_x -= acceleration;
+        if (velocity_x < -max_speed)
+            velocity_x = -max_speed;
+    } else {
+        // 沒有左右按鍵時施加摩擦（水平減速）
         if (velocity_x > 0) {
             velocity_x -= friction;
             if (velocity_x < 0) velocity_x = 0;
@@ -55,50 +39,57 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
             if (velocity_x > 0) velocity_x = 0;
         }
     }
-    // 當沒有垂直按鍵時施加摩擦
-    if (!Util::Input::IsKeyPressed(Util::Keycode::UP) && !Util::Input::IsKeyPressed(Util::Keycode::DOWN)) {
-        if (velocity_y > 0) {
-            velocity_y -= friction;
-            if (velocity_y < 0) velocity_y = 0;
-        } else if (velocity_y < 0) {
-            velocity_y += friction;
-            if (velocity_y > 0) velocity_y = 0;
-        }
-    }
 
-    // 分別檢查水平與垂直碰撞
-    glm::vec2 newPos = oldPos;   // 從原始位置開始計算
-
-    // 先更新水平方向
+    // 計算新的位置
+    glm::vec2 newPos = oldPos;
     newPos.x += velocity_x;
-    // 對水平移動進行碰撞檢測（僅關注左右）
+    // 檢查下一步的水平碰撞
     {
-        // 先儲存原始水平位置
-        glm::vec2 testPos = newPos; // 水平移動後的暫時位置
-        SetCoordinate({testPos.x, oldPos.y}); // 只更新水平部分
+        glm::vec2 testPos = newPos;
+        SetCoordinate({testPos.x, oldPos.y});
         CollisionFlags horizontalFlags;
         DetectSideCollisions(walls, horizontalFlags);
         if (horizontalFlags.left || horizontalFlags.right) {
-            // 若有水平方向碰撞，回復水平位置
             newPos.x = oldPos.x;
             velocity_x = 0;
         }
     }
 
-    // 接著更新垂直方向
+    // 處理跳躍
+    // 當角色在地面上且按下跳躍鍵（這裡使用 C 鍵），且上方沒有阻擋時，就設定初始垂直速度為負值（向上）
+    if (Util::Input::IsKeyPressed(Util::Keycode::C)) {
+        //std::cout << "Pressed C" << std::endl;
+        if (IsGround && !flags.up) {
+            velocity_y += Jumpforce;
+            IsGround = false;
+        }
+    }
+
+    // 當角色不在地面時施加重力（使角色向下加速）
+    if (!IsGround) {
+        velocity_y -= Gravity;
+        if (velocity_y < max_fall_speed)
+            velocity_y = max_fall_speed;
+    }
+
     newPos.y += velocity_y;
+    // 檢查下一步的垂直碰撞
     {
         glm::vec2 testPos = newPos;
-        SetCoordinate({newPos.x, testPos.y}); // 只更新垂直部分
+        SetCoordinate({newPos.x, testPos.y});
         CollisionFlags verticalFlags;
         DetectSideCollisions(walls, verticalFlags);
         if (verticalFlags.up || verticalFlags.down) {
             newPos.y = oldPos.y;
             velocity_y = 0;
+            if (verticalFlags.down) {
+                // 當角色碰到底部（地面），視為在地面上
+                IsGround = true;
+            }
         }
     }
 
-    // 最終設定角色座標
+    // 更新角色最終位置
     SetCoordinate(newPos);
 }
 

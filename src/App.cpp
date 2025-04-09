@@ -14,7 +14,7 @@ void App::Start() {
 
     // 設置角色圖片
     m_madline = std::make_shared<MainCharacter>(GA_RESOURCE_DIR "CharacterImg/standR.png");
-    m_madline->SetCoordinate({-100.0f, -100.0f});  // 確保角色在可見範圍
+    m_madline->SetCoordinate({-200.0f, -100.0f});  // 確保角色在可見範圍
     m_madline->SetZIndex(100);  // 設置角色在頂層
     m_Root.AddChild(m_madline);  // 添加角色到根物件
 

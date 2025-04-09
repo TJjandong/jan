@@ -22,6 +22,8 @@ public:
 private:
     float velocity_x = 0;
     float velocity_y = 0;
+    bool IsGround = false;
+    bool IsJumping = false;
 
 };
 
