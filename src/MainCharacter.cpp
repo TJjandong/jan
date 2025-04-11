@@ -13,7 +13,7 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
     const float max_speed = 5.0f;
     const float acceleration = 4.0f;
     const float friction = 4.0f;
-    const float Jumpforce = 60.0f;         // 跳躍時的初速度大小
+    const float Jumpforce = 10.0f;         // 跳躍時的初速度大小
     const float Gravity = 0.5f;            // 重力加速度，每幀施加
     const float max_fall_speed = -max_speed * 1.5f;  // 限制垂直下落速度
 
@@ -60,13 +60,14 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
     if (Util::Input::IsKeyPressed(Util::Keycode::C)) {
         //std::cout << "Pressed C" << std::endl;
         if (IsGround && !flags.up) {
-            velocity_y += Jumpforce;
+            velocity_y = Jumpforce;
             IsGround = false;
+            IsJumping = true;
         }
     }
 
     // 當角色不在地面時施加重力（使角色向下加速）
-    if (!IsGround) {
+    if (!IsGround || IsJumping) {
         velocity_y -= Gravity;
         if (velocity_y < max_fall_speed)
             velocity_y = max_fall_speed;
@@ -85,8 +86,11 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
             if (verticalFlags.down) {
                 // 當角色碰到底部（地面），視為在地面上
                 IsGround = true;
+                std::cout << "IsGround" << std::endl;
             }
-        }
+            if (verticalFlags.up) std::cout << "IsUp" << std::endl;
+        }else if (!verticalFlags.down)
+            IsGround = false;
     }
 
     // 更新角色最終位置
@@ -110,11 +114,11 @@ void MainCharacter::DetectSideCollisions(const std::vector<std::shared_ptr<Util:
     glm::vec2 rightRectPos  = { posA.x + sizeA.x, posA.y };
     glm::vec2 rightRectSize = { eps, sizeA.y };
 
-    glm::vec2 upRectPos     = { posA.x, posA.y - eps };
-    glm::vec2 upRectSize    = { sizeA.x, eps };
+    glm::vec2 downRectPos     = { posA.x, posA.y - eps };
+    glm::vec2 downRectSize    = { sizeA.x, eps };
 
-    glm::vec2 downRectPos   = { posA.x, posA.y + sizeA.y };
-    glm::vec2 downRectSize  = { sizeA.x, eps };
+    glm::vec2 upRectPos   = { posA.x, posA.y + sizeA.y };
+    glm::vec2 upRectSize  = { sizeA.x, eps };
 
     // 檢查每個牆壁
     for (const auto &wallObj : walls) {
