@@ -18,13 +18,13 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
     glm::vec2 oldPos = GetCoordinate();
 
     // 定義移動與物理參數
-    const float max_speed = 4.0f;
+    const float max_speed = 4.2f;
     const float acceleration = 6.0f;
     const float friction = 4.0f;
     const float Jumpforce = 20.0f;         // 跳躍時的初速度
     const float Dashforce = 30.0f;           // 衝刺時的初速度
     float Gravity = 1.0f;            // 重力加速度，每幀施加
-    const float max_fall_speed = -max_speed * 2.7f;  // 限制垂直下落速度
+    const float max_fall_speed = -max_speed * 2.3f;  // 限制垂直下落速度
 
     CollisionFlags flags;
     DetectSideCollisions(walls, flags);
@@ -60,10 +60,11 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
             }
         }
     } else {
+        Gravity = 0.0f;
         if (velocity_x > max_speed) velocity_x -= friction * 0.6f;
         if (velocity_x < -max_speed) velocity_x += friction * 0.6f;
-        if (velocity_y > max_speed) velocity_y -= friction * 0.4f;
-        if (velocity_y < -max_speed) velocity_y += friction * 0.4f;
+        if (velocity_y > max_speed) velocity_y -= friction * 1.0f;
+        if (velocity_y < -max_speed) velocity_y += friction * 1.0f;
     }
 
     // 計算新的水平位置
@@ -78,12 +79,17 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
         if (horizontalFlags.left || horizontalFlags.right) {
             newPos.x = oldPos.x;
             velocity_x = 0;
+            if (!IsGround) {
+                Isgrabbing = true;
+            }
+        }else {
+            Isgrabbing = false;
         }
     }
 
     // 處理跳躍：若角色在地面上且按下 C 鍵，觸發跳躍
     if (PressC) {
-        if (IsGround && !flags.up && !IsJumping) {
+        if (!flags.up && !IsJumping) {
             velocity_y = Jumpforce;
             IsGround = false;
             IsJumping = true;
@@ -114,15 +120,28 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
 
     // 當角色不在地面時施加重力
     if (!IsGround) {
-        if (velocity_y >= 0)
+        if (velocity_y >= 2.5f)
             velocity_y -= Gravity - 0.5f;
-        if (velocity_y <= 0.5 && velocity_y >=-0.5)
-            velocity_y -= Gravity - 0.9f;
+        if (velocity_y < 2.5f && velocity_y > 0)
+            velocity_y -= Gravity - 0.8f;
         else
             velocity_y -= Gravity;
 
         if (velocity_y < max_fall_speed)
             velocity_y = max_fall_speed;
+
+        if (Isgrabbing) {
+            if (velocity_y < 0) {
+                if (velocity_y > max_fall_speed*0.4f)
+                    velocity_y -= Gravity * 0.03f;
+                else
+                    velocity_y = max_fall_speed*0.4f;
+            }
+        }
+
+        if (nearLeftWall) {
+
+        }
     }
 
     // 更新新的垂直位置
@@ -192,6 +211,7 @@ void MainCharacter::DetectSideCollisions(const std::vector<std::shared_ptr<Util:
         }
     }
 }
+
 
 bool MainCharacter::RectOverlap(const glm::vec2 &a, const glm::vec2 &sizeA,
                                   const glm::vec2 &b, const glm::vec2 &sizeB) {
