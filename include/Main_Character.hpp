@@ -19,11 +19,18 @@ public:
 
     static bool RectOverlap(const glm::vec2 &a, const glm::vec2 &sizeA, const glm::vec2 &b, const glm::vec2 &sizeB);
 
+    void SetDashed(bool d) { Dashed = d; };
+
 private:
     float velocity_x = 0;
     float velocity_y = 0;
     bool IsGround = false;
     bool IsJumping = false;
+    bool Dashed = false;
+    bool isDashing = false;
+    bool LeanWall = false;
+    float dashTimer = 0.0f;           // 單位：毫秒
+    const float dashDuration = 200.0f; // 衝刺持續 200 毫秒，可依需求調整
 
 };
 
