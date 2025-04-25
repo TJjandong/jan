@@ -1,5 +1,5 @@
-#ifndef GIRAFFE_HPP
-#define GIRAFFE_HPP
+#ifndef OBJECTS_HPP
+#define OBJECTS_HPP
 
 #include <utility>
 
@@ -30,7 +30,7 @@ public:
 
     void SetCoordinate(const glm::vec2& Coordinate);
 
-    bool IfCollidesChracter(const std::shared_ptr<Characters>& other) const;
+    bool IfCollidesCharacter(const std::shared_ptr<Characters>& other) const;
 
     // TODO: Add and implement more methods and properties as needed to finish Giraffe Adventure.
     void SetScale(float scaleX, float scaleY);

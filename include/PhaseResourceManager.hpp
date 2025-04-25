@@ -1,14 +1,14 @@
-#ifndef PHASE_MANGER_HPP
-#define PHASE_MANGER_HPP
+#ifndef PHASE_MANAGER_HPP
+#define PHASE_MANAGER_HPP
 
 #include "Util/GameObject.hpp"
-#include "Characters.hpp"
+#include "Objects.hpp"
 #include "BackgroundImage.hpp"
 #include <vector>
 
-class PhaseResourceManger {
+class PhaseResourceManager {
 public:
-    PhaseResourceManger();
+    PhaseResourceManager();
 
     [[nodiscard]] std::vector<std::shared_ptr<Util::GameObject>> GetChildren() const {
         // 所有的背景與牆壁
@@ -35,4 +35,4 @@ private:
 };
 
 
-#endif //PHASE_MANGER_HPP
+#endif //PHASE_MANAGER_HPP

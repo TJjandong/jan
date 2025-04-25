@@ -1,4 +1,4 @@
-#include "Characters.hpp"
+#include "Objects.hpp"
 #include "util/Input.hpp"
 #include "Main_Character.hpp"
 #include "Util/Time.hpp"
@@ -17,16 +17,49 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
     // 儲存原始位置
     glm::vec2 oldPos = GetCoordinate();
 
+    // 處理跳躍輸入緩衝：按下 C 後開始計時
+    if (PressC) {
+        m_JumpBuffered = true;
+        m_JumpBufferTime = JUMP_BUFFER_DURATION;
+    } else if (m_JumpBuffered) {
+        m_JumpBufferTime -= Util::Time::GetDeltaTime();
+        if (m_JumpBufferTime <= 0.0f)
+            m_JumpBuffered = false;
+    }
+
+    // 處理衝刺輸入緩衝（X鍵）
+    if ((PressX || m_DashBuffered) && !Dashed) {
+        isDashing = true;
+        dashTimer = dashDuration;
+        Dashed = true;
+        m_DashBuffered = false; //  一旦使用過 buffer 就要清掉！
+        const float Dashforce = 30.0f;
+
+        if (PressUP)
+            velocity_y = Dashforce;
+        if (PressDOWN)
+            velocity_y = -Dashforce;
+        if (PressRIGHT)
+            velocity_x = Dashforce;
+        if (PressLEFT)
+            velocity_x = -Dashforce;
+
+        IsJumping = true;
+    }
+
+
+
     // 定義移動與物理參數
-    const float max_speed = 4.2f;
+    const float max_speed = 4.0f;
     const float acceleration = 6.0f;
     const float friction = 4.0f;
     const float Jumpforce = 20.0f;         // 跳躍時的初速度
     const float Dashforce = 30.0f;           // 衝刺時的初速度
     float Gravity = 1.0f;            // 重力加速度，每幀施加
-    const float max_fall_speed = -max_speed * 2.3f;  // 限制垂直下落速度
+    const float max_fall_speed = -max_speed * 2.4f;  // 限制垂直下落速度
 
     CollisionFlags flags;
+
     DetectSideCollisions(walls, flags);
 
     // 更新衝刺計時器：當處於衝刺狀態時不受 max_speed 限制
@@ -60,11 +93,10 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
             }
         }
     } else {
-        Gravity = 0.0f;
         if (velocity_x > max_speed) velocity_x -= friction * 0.6f;
         if (velocity_x < -max_speed) velocity_x += friction * 0.6f;
-        if (velocity_y > max_speed) velocity_y -= friction * 1.0f;
-        if (velocity_y < -max_speed) velocity_y += friction * 1.0f;
+        if (velocity_y > max_speed) velocity_y -= friction * 0.4f;
+        if (velocity_y < -max_speed) velocity_y += friction * 0.4f;
     }
 
     // 計算新的水平位置
@@ -79,25 +111,20 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
         if (horizontalFlags.left || horizontalFlags.right) {
             newPos.x = oldPos.x;
             velocity_x = 0;
-            if (!IsGround) {
-                Isgrabbing = true;
-            }
-        }else {
-            Isgrabbing = false;
         }
     }
 
-    // 處理跳躍：若角色在地面上且按下 C 鍵，觸發跳躍
-    if (PressC) {
-        if (!flags.up && !IsJumping) {
-            velocity_y = Jumpforce;
-            IsGround = false;
-            IsJumping = true;
-        }
+    if ((m_JumpBuffered && (m_CoyoteTime > 0.0f || IsGround)) && !flags.up && !IsJumping) {
+        velocity_y = Jumpforce;
+        IsGround = false;
+        IsJumping = true;
+
+        m_CoyoteTime = 0.0f;
+        m_JumpBuffered = false;
     }
 
     // 處理衝刺：按下 X 鍵時啟動衝刺效果
-    if (PressX && !Dashed) {
+    if ((PressX || m_DashBuffered) && !Dashed) {
         // 啟動衝刺，重設衝刺計時器（單位：毫秒）
         isDashing = true;
         dashTimer = dashDuration;
@@ -120,28 +147,15 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
 
     // 當角色不在地面時施加重力
     if (!IsGround) {
-        if (velocity_y >= 2.5f)
+        if (velocity_y >= 0)
             velocity_y -= Gravity - 0.5f;
-        if (velocity_y < 2.5f && velocity_y > 0)
-            velocity_y -= Gravity - 0.8f;
+        if (velocity_y <= 0.5 && velocity_y >=-0.5)
+            velocity_y -= Gravity - 0.9f;
         else
             velocity_y -= Gravity;
 
         if (velocity_y < max_fall_speed)
             velocity_y = max_fall_speed;
-
-        if (Isgrabbing) {
-            if (velocity_y < 0) {
-                if (velocity_y > max_fall_speed*0.4f)
-                    velocity_y -= Gravity * 0.03f;
-                else
-                    velocity_y = max_fall_speed*0.4f;
-            }
-        }
-
-        if (nearLeftWall) {
-
-        }
     }
 
     // 更新新的垂直位置
@@ -211,7 +225,6 @@ void MainCharacter::DetectSideCollisions(const std::vector<std::shared_ptr<Util:
         }
     }
 }
-
 
 bool MainCharacter::RectOverlap(const glm::vec2 &a, const glm::vec2 &sizeA,
                                   const glm::vec2 &b, const glm::vec2 &sizeB) {

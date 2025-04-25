@@ -1,4 +1,4 @@
-#include "PhaseResourceManger.hpp"
+#include "PhaseResourceManager.hpp"
 
 #include <fstream>
 #include <sstream>
@@ -7,23 +7,23 @@
 #include "Util/Logger.hpp"
 #include "Util/Image.hpp"
 #include "InvisibleWall.hpp"
-#include "Characters.hpp"
+#include "Objects.hpp"
 
-PhaseResourceManger::PhaseResourceManger() {
+PhaseResourceManager::PhaseResourceManager() {
     //m_TaskText = std::make_shared<TaskText>();
     m_Background = std::make_shared<BackgroundImage>();
 }
 
-void PhaseResourceManger::NextPhase() {
+void PhaseResourceManager::NextPhase() {
     if (m_Phase == 21) return;
     LOG_DEBUG("Passed! Next phase: {}", m_Phase);
     m_Background->NextPhase(m_Phase);
     //m_TaskText->NextPhase(m_Phase++);
 }
 
-void PhaseResourceManger::SetWall(const int phase) {
+void PhaseResourceManager::SetWall(const int phase) {
     // 指定牆壁資料的 txt 檔路徑（請根據實際路徑調整）
-    std::string wallFilePath = "C:/Users/jan20/jan/Resources/WallMatrix/" + std::to_string(phase) + ".txt";
+    std::string wallFilePath = "C:/Users/USER/Desktop/Celeste/ptsd-template/Resources/WallMatrix/" + std::to_string(phase) + ".txt";
     std::ifstream file(wallFilePath);
     if (!file) {
         LOG_ERROR("無法開啟牆壁資料檔案: {}", wallFilePath);

@@ -1,4 +1,4 @@
-#include "Characters.hpp"
+#include "Objects.hpp"
 
 #include <iostream>
 
@@ -39,7 +39,7 @@ void Characters::SetCoordinate(const glm::vec2& Coordinate) {
     m_Position.y = (m_Transform.translation.y + 384) / 6.0f;
 }
 
-bool Characters::IfCollidesChracter(const std::shared_ptr<Characters>& other) const {
+bool Characters::IfCollidesCharacter(const std::shared_ptr<Characters>& other) const {
     glm::vec2 posA = m_Transform.translation;
     glm::vec2 sizeA = m_Transform.scale; // 假設這表示物件的寬和高
 

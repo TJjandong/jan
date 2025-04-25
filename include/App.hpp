@@ -4,9 +4,9 @@
 #include "pch.hpp" // IWYU pragma: export
 
 #include "Util/Renderer.hpp"
-#include "Characters.hpp"
-#include "PhaseResourceManger.hpp"
-#include "AnimatedCharacter.hpp"
+#include "Objects.hpp"
+#include "PhaseResourceManager.hpp"
+#include "AnimatedObjects.hpp"
 #include "Main_Character.hpp"
 
 class App {
@@ -69,7 +69,7 @@ private:
     std::shared_ptr<AnimatedCharacter> m_key;
     std::shared_ptr<AnimatedCharacter> m_Balloon;
 
-    std::shared_ptr<PhaseResourceManger> m_PRM;
+    std::shared_ptr<PhaseResourceManager> m_PRM;
 
     bool m_EnterDown = false;
 };

@@ -1,5 +1,5 @@
-#ifndef ANIMATED_CHARACTER_HPP
-#define ANIMATED_CHARACTER_HPP
+#ifndef ANIMATED_OBJECTS_HPP
+#define ANIMATED_OBJECTS_HPP
 
 #include <vector>
 #include <string>

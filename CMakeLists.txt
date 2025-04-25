@@ -35,11 +35,18 @@ add_executable(${PROJECT_NAME}
     ${SRC_DIR}/main.cpp
     ${SRC_FILES}
     ${HEADER_FILES}
-        src/Characters.cpp
-        src/MainCharacter.cpp
-        include/Main_Character.hpp
+        include/BackgroundImage.hpp
+        include/AnimatedObjects.hpp
         include/AppUtil.hpp
+        include/Objects.hpp
         include/InvisibleWall.hpp
+        include/Main_Character.hpp
+        include/PhaseResourceManager.hpp
+        src/AnimatedObjects.cpp
+        src/AppUtil.cpp
+        src/Objects.cpp
+        src/MainCharacter.cpp
+        src/PhaseResourceManager.cpp
 )
 
 if(MSVC)

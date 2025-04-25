@@ -1,7 +1,7 @@
 #ifndef INVISIBLE_WALL_HPP
 #define INVISIBLE_WALL_HPP
 
-#include "Characters.hpp"
+#include "Objects.hpp"
 
 // InvisibleWall 繼承自 Characters，不顯示圖片，只用來作為碰撞用的隱形牆
 class InvisibleWall : public Characters {
