@@ -22,7 +22,7 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
         m_JumpBuffered = true;
         m_JumpBufferTime = JUMP_BUFFER_DURATION;
     } else if (m_JumpBuffered) {
-        m_JumpBufferTime -= Util::Time::GetDeltaTime();
+        m_JumpBufferTime -= Util::Time::GetDeltaTimeMs();
         if (m_JumpBufferTime <= 0.0f)
             m_JumpBuffered = false;
     }
@@ -33,6 +33,7 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
         dashTimer = dashDuration;
         Dashed = true;
         m_DashBuffered = false; //  一旦使用過 buffer 就要清掉！
+        velocity_y = 0.0f;
         const float Dashforce = 30.0f;
 
         if (PressUP)
@@ -46,8 +47,6 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
 
         IsJumping = true;
     }
-
-
 
     // 定義移動與物理參數
     const float max_speed = 4.0f;
@@ -93,10 +92,11 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
             }
         }
     } else {
+        Gravity = 0.0f;
         if (velocity_x > max_speed) velocity_x -= friction * 0.6f;
         if (velocity_x < -max_speed) velocity_x += friction * 0.6f;
-        if (velocity_y > max_speed) velocity_y -= friction * 0.4f;
-        if (velocity_y < -max_speed) velocity_y += friction * 0.4f;
+        if (velocity_y > max_speed) velocity_y -= friction * 1.0f;
+        if (velocity_y < -max_speed) velocity_y += friction * 1.0f;
     }
 
     // 計算新的水平位置
@@ -111,6 +111,11 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
         if (horizontalFlags.left || horizontalFlags.right) {
             newPos.x = oldPos.x;
             velocity_x = 0;
+            if (!IsGround) {
+                Isgrabbing = true;
+            }
+        }else {
+            Isgrabbing = false;
         }
     }
 
@@ -123,39 +128,26 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
         m_JumpBuffered = false;
     }
 
-    // 處理衝刺：按下 X 鍵時啟動衝刺效果
-    if ((PressX || m_DashBuffered) && !Dashed) {
-        // 啟動衝刺，重設衝刺計時器（單位：毫秒）
-        isDashing = true;
-        dashTimer = dashDuration;
-        Dashed = true;
-
-        // 依照方向給予衝刺速度（這裡會覆蓋原本的水平或垂直速度）
-        // 注意：你可以依照需求調整碰撞與優先順序，例如左右方向與上下方向同時選擇時的行為
-        if (PressUP)
-            velocity_y = Dashforce;
-        if (PressDOWN)
-            velocity_y = -Dashforce;
-        if (PressRIGHT)
-            velocity_x = Dashforce;
-        if (PressLEFT)
-            velocity_x = -Dashforce;
-
-        // 衝刺通常也會讓角色進入跳躍狀態
-        IsJumping = true;
-    }
-
     // 當角色不在地面時施加重力
     if (!IsGround) {
-        if (velocity_y >= 0)
+        if (velocity_y >= 2.5f)
             velocity_y -= Gravity - 0.5f;
-        if (velocity_y <= 0.5 && velocity_y >=-0.5)
-            velocity_y -= Gravity - 0.9f;
+        if (velocity_y <= 2.5f && velocity_y > 0)
+            velocity_y -= Gravity - 0.8f;
         else
             velocity_y -= Gravity;
 
         if (velocity_y < max_fall_speed)
             velocity_y = max_fall_speed;
+
+        if (Isgrabbing) {
+            if (velocity_y < 0) {
+                if (velocity_y > max_fall_speed*0.4f)
+                    velocity_y -= Gravity * 0.03f;
+                else
+                    velocity_y = max_fall_speed*0.4f;
+            }
+        }
     }
 
     // 更新新的垂直位置

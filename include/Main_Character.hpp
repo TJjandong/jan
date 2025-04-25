@@ -27,6 +27,9 @@ private:
     bool Dashed = false;
     bool isDashing = false;
     bool LeanWall = false;
+    bool Isgrabbing = false;
+    bool nearLeftWall = false;
+    bool nearRightWall = false;
     float dashTimer = 0.0f;           // 單位：毫秒
     const float dashDuration = 200.0f; // 衝刺持續 200 毫秒，可依需求調整
 

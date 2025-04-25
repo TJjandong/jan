@@ -23,7 +23,7 @@ void PhaseResourceManager::NextPhase() {
 
 void PhaseResourceManager::SetWall(const int phase) {
     // 指定牆壁資料的 txt 檔路徑（請根據實際路徑調整）
-    std::string wallFilePath = "C:/Users/USER/Desktop/Celeste/ptsd-template/Resources/WallMatrix/" + std::to_string(phase) + ".txt";
+    std::string wallFilePath = "C:/Users/jan20/jan/Resources/WallMatrix/" + std::to_string(phase) + ".txt";
     std::ifstream file(wallFilePath);
     if (!file) {
         LOG_ERROR("無法開啟牆壁資料檔案: {}", wallFilePath);

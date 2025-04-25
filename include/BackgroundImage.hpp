@@ -3,7 +3,7 @@
 
 #include "Util/GameObject.hpp"
 #include "Util/Image.hpp"
-#define GA_RESOURCE_DIR "C:/Users/USER/Desktop/Celeste/ptsd-template/Resources/Image/"
+#define GA_RESOURCE_DIR "C:/Users/jan20/jan/Resources/Image/"
 
 class BackgroundImage : public Util::GameObject {
 
