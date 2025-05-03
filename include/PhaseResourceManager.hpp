@@ -3,6 +3,7 @@
 
 #include "Util/GameObject.hpp"
 #include "Objects.hpp"
+#include "Trap.hpp"
 #include "BackgroundImage.hpp"
 #include <vector>
 
@@ -24,6 +25,8 @@ public:
 
     void SetWall(const int phase);
 
+    void SetTraps(int phase);
+
     std::vector<std::shared_ptr<Util::GameObject>> GetWall() const {
         return m_Walls;
     }
@@ -31,6 +34,7 @@ public:
 private:
     std::shared_ptr<BackgroundImage> m_Background;
     std::vector<std::shared_ptr<Util::GameObject>> m_Walls;     // 儲存所有牆壁物件
+    std::vector<std::shared_ptr<Trap>> m_Traps;
     int m_Phase = 1;
 };
 

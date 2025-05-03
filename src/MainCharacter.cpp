@@ -2,6 +2,7 @@
 #include "util/Input.hpp"
 #include "Main_Character.hpp"
 #include "Util/Time.hpp"
+#include "InvisibleWall.hpp"
 #include <string>
 #include <iostream>
 #include <cmath>
@@ -14,21 +15,63 @@
 #define PressUP Util::Input::IsKeyPressed(Util::Keycode::UP)
 
 void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>>& walls) {
+    // 定義移動與物理參數
+    const float max_speed = 4.0f;
+    const float acceleration = 6.0f;
+    const float friction = 4.0f;
+    const float Jumpforce = 18.0f;         // 跳躍時的初速度
+    const float Dashforce = 30.0f;           // 衝刺時的初速度
+    float Gravity = 0.9f;            // 重力加速度，每幀施加
+    const float max_fall_speed = -max_speed * 2.4f;  // 限制垂直下落速度
+    nearLeftWall  = false;
+    nearRightWall = false;
+
+    // 時間
+    float dt_ms = Util::Time::GetDeltaTimeMs();
+    float dt_s  = dt_ms * 0.001f;
+
+    // 讀取按鍵邊緣
+    bool cPressedNow   = PressC;
+    bool cJustPressed  = (cPressedNow && !m_CPressedLastFrame);
+    m_CPressedLastFrame = cPressedNow;
+
+    bool xPressedNow  = PressX;
+    bool xJustPressed  = (xPressedNow && !m_XPressedLastFrame);
+    m_XPressedLastFrame = xPressedNow;
+
     // 儲存原始位置
     glm::vec2 oldPos = GetCoordinate();
 
-    // 處理跳躍輸入緩衝：按下 C 後開始計時
-    if (PressC) {
-        m_JumpBuffered = true;
-        m_JumpBufferTime = JUMP_BUFFER_DURATION;
-    } else if (m_JumpBuffered) {
-        m_JumpBufferTime -= Util::Time::GetDeltaTimeMs();
-        if (m_JumpBufferTime <= 0.0f)
-            m_JumpBuffered = false;
+    // 1. 側邊碰撞偵測（用來牆滑、抓牆）
+    CollisionFlags sideFlags;
+    DetectSideCollisions(walls, sideFlags);
+    Isgrabbing = (sideFlags.left || sideFlags.right) && !IsGround;
+
+    // 角色碰撞箱 & 探测参数
+    glm::vec2 charPos   = GetCoordinate() + glm::vec2{0,10};
+    glm::vec2 charSize  = {30,27};
+    constexpr float WALL_RANGE = 12.0f;
+
+    // 左、右探测箱
+    glm::vec2 probeL_pos  = { charPos.x - WALL_RANGE,   charPos.y };
+    glm::vec2 probeL_size = { WALL_RANGE,               charSize.y };
+    glm::vec2 probeR_pos  = { charPos.x + charSize.x,   charPos.y };
+    glm::vec2 probeR_size = { WALL_RANGE,               charSize.y };
+
+    for (auto &w : walls) {
+        auto wall = std::dynamic_pointer_cast<InvisibleWall>(w);
+        if (!wall) continue;
+        glm::vec2 wallPos  = wall->GetCoordinate();
+        glm::vec2 wallSize = wall->m_Transform.scale;
+
+        if (RectOverlap(probeL_pos, probeL_size, wallPos, wallSize))
+            nearLeftWall = true;
+        if (RectOverlap(probeR_pos, probeR_size, wallPos, wallSize))
+            nearRightWall = true;
     }
 
     // 處理衝刺輸入緩衝（X鍵）
-    if ((PressX || m_DashBuffered) && !Dashed) {
+    if ((xJustPressed || m_DashBuffered) && !Dashed) {
         isDashing = true;
         dashTimer = dashDuration;
         Dashed = true;
@@ -48,23 +91,13 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
         IsJumping = true;
     }
 
-    // 定義移動與物理參數
-    const float max_speed = 4.0f;
-    const float acceleration = 6.0f;
-    const float friction = 4.0f;
-    const float Jumpforce = 20.0f;         // 跳躍時的初速度
-    const float Dashforce = 30.0f;           // 衝刺時的初速度
-    float Gravity = 1.0f;            // 重力加速度，每幀施加
-    const float max_fall_speed = -max_speed * 2.4f;  // 限制垂直下落速度
-
     CollisionFlags flags;
 
     DetectSideCollisions(walls, flags);
 
     // 更新衝刺計時器：當處於衝刺狀態時不受 max_speed 限制
     if (isDashing) {
-        float dt = Util::Time::GetDeltaTimeMs(); // 取得每幀毫秒數
-        dashTimer -= dt;
+        dashTimer -= dt_ms;
         if (dashTimer <= 0) {
             isDashing = false;
             // 衝刺結束時可以選擇重置部分狀態
@@ -73,30 +106,45 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
 
     // 處理水平移動（只有在非衝刺狀態下才會被 clamped）
     if (!isDashing) {
-        if (PressRIGHT) {
-            velocity_x += acceleration;
-            if (velocity_x > max_speed)
-                velocity_x = max_speed;
-        } else if (PressLEFT) {
-            velocity_x -= acceleration;
-            if (velocity_x < -max_speed)
-                velocity_x = -max_speed;
-        } else {
-            // 沒有左右按鍵時施加摩擦（水平減速）
+        bool appliedInput = false;
+
+        // 1) 只有在鎖定結束後，才允許按鍵改變 velocity_x
+        if (m_WallJumpLockTimer <= 0.0f) {
+            if (PressRIGHT) {
+                velocity_x += acceleration;
+                appliedInput = true;
+            } else if (PressLEFT) {
+                velocity_x -= acceleration;
+                appliedInput = true;
+            }
+
+            // 限速
+            if (velocity_x >  max_speed) velocity_x =  max_speed;
+            if (velocity_x < -max_speed) velocity_x = -max_speed;
+        }else {
             if (velocity_x > 0) {
-                velocity_x -= friction;
-                if (velocity_x < 0) velocity_x = 0;
+                velocity_x = std::max(0.0f, velocity_x - friction * 0.4f);
             } else if (velocity_x < 0) {
-                velocity_x += friction;
-                if (velocity_x > 0) velocity_x = 0;
+                velocity_x = std::min(0.0f, velocity_x + friction * 0.4f);
+            }
+            appliedInput = true;
+        }
+
+        // 2) 當「沒有使用按鍵」或「仍在鎖定期」時，套摩擦
+        //    也就是：只要 appliedInput == false，就一直摩擦
+        if (!appliedInput) {
+            if (velocity_x > 0) {
+                velocity_x = std::max(0.0f, velocity_x - friction);
+            } else if (velocity_x < 0) {
+                velocity_x = std::min(0.0f, velocity_x + friction);
             }
         }
     } else {
         Gravity = 0.0f;
         if (velocity_x > max_speed) velocity_x -= friction * 0.6f;
         if (velocity_x < -max_speed) velocity_x += friction * 0.6f;
-        if (velocity_y > max_speed) velocity_y -= friction * 1.0f;
-        if (velocity_y < -max_speed) velocity_y += friction * 1.0f;
+        if (velocity_y > max_speed) velocity_y -= friction * 0.8f;
+        if (velocity_y < -max_speed) velocity_y += friction * 0.8f;
     }
 
     // 計算新的水平位置
@@ -113,27 +161,59 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
             velocity_x = 0;
             if (!IsGround) {
                 Isgrabbing = true;
+                if (horizontalFlags.left) nearLeftWall = true;
+                if (horizontalFlags.right) nearRightWall = true;
+                IsJumping = false;
             }
         }else {
             Isgrabbing = false;
         }
     }
 
-    if ((m_JumpBuffered && (m_CoyoteTime > 0.0f || IsGround)) && !flags.up && !IsJumping) {
-        velocity_y = Jumpforce;
-        IsGround = false;
-        IsJumping = true;
+    // 更新 Coyote Time
+    if (IsGround) m_CoyoteTime = COYOTE_TIME_TOLERANCE;
+    else m_CoyoteTime = std::max(m_CoyoteTime - dt_s, 0.0f);
 
-        m_CoyoteTime = 0.0f;
-        m_JumpBuffered = false;
+    // 處理跳躍輸入緩衝：按下 C 後開始計時
+    if (cJustPressed) {
+        m_JumpBuffered = true;
+        m_JumpBufferTime = JUMP_BUFFER_DURATION;
     }
+    //只計算按住那瞬間的跳躍緩衝
+    if (m_JumpBuffered) {
+        m_JumpBufferTime -= dt_s;
+        if (m_JumpBufferTime <= 0.0f)
+            m_JumpBuffered = false;
+    }
+
+    if (m_WallJumpLockTimer > 0.0f) {
+        m_WallJumpLockTimer = std::max(0.0f, m_WallJumpLockTimer - dt_s);
+    }
+
+    if (m_JumpBuffered && !IsJumping &&((IsGround && m_CoyoteTime>0) || (!IsGround && (nearLeftWall||nearRightWall)))) {
+        // 地面跳
+        if (IsGround) {
+            velocity_y = Jumpforce;
+        } else {
+            // 壁跳
+            velocity_y = Jumpforce;
+            velocity_x = (nearLeftWall ? +Jumpforce : -Jumpforce);
+
+            m_WallJumpLockTimer = WALL_JUMP_LOCK_DURATION;
+        }
+        IsGround      = false;
+        IsJumping     = true;
+        m_JumpBuffered= false;
+        m_CoyoteTime  = 0.0f;
+    }
+
 
     // 當角色不在地面時施加重力
     if (!IsGround) {
-        if (velocity_y >= 2.5f)
-            velocity_y -= Gravity - 0.5f;
+        if (velocity_y > 2.5f)
+            velocity_y -= Gravity - 0.45f;
         if (velocity_y <= 2.5f && velocity_y > 0)
-            velocity_y -= Gravity - 0.8f;
+            velocity_y -= Gravity - 0.7f;
         else
             velocity_y -= Gravity;
 
@@ -143,7 +223,7 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
         if (Isgrabbing) {
             if (velocity_y < 0) {
                 if (velocity_y > max_fall_speed*0.4f)
-                    velocity_y -= Gravity * 0.03f;
+                    velocity_y -= Gravity * 0.033f;
                 else
                     velocity_y = max_fall_speed*0.4f;
             }
@@ -202,16 +282,19 @@ void MainCharacter::DetectSideCollisions(const std::vector<std::shared_ptr<Util:
 
     // 檢查每個牆壁
     for (const auto &wallObj : walls) {
-        auto wall = std::dynamic_pointer_cast<Characters>(wallObj);
+        auto wall = std::dynamic_pointer_cast<Objects>(wallObj);
         if (wall) {
             glm::vec2 posB = wall->GetCoordinate();
             glm::vec2 sizeB = wall->m_Transform.scale;  // 牆壁尺寸
             if (RectOverlap(leftRectPos, leftRectSize, posB, sizeB))
                 flags.left = true;
+
             if (RectOverlap(rightRectPos, rightRectSize, posB, sizeB))
                 flags.right = true;
+
             if (RectOverlap(upRectPos, upRectSize, posB, sizeB))
                 flags.up = true;
+
             if (RectOverlap(downRectPos, downRectSize, posB, sizeB))
                 flags.down = true;
         }

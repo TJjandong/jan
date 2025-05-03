@@ -2,9 +2,9 @@
 #define MAIN_CHARACTER_HPP
 #include "Objects.hpp"
 
-class MainCharacter : public Characters {
+class MainCharacter : public Objects {
 public:
-    MainCharacter(const std::string& ImagePath) : Characters(ImagePath) {}
+    MainCharacter(const std::string& ImagePath) : Objects(ImagePath) {}
 
     struct CollisionFlags {
         bool left = false;
@@ -34,13 +34,20 @@ private:
     const float dashDuration = 200.0f; // 衝刺持續 200 毫秒，可依需求調整
 
     float m_CoyoteTime = 0.0f; // 剩餘郊狼時間
-    const float COYOTE_TIME_TOLERANCE = 0.5f; // 最大容許時間（秒）
+    const float COYOTE_TIME_TOLERANCE = 1.5f; // 最大容許時間（秒）
 
+    bool m_CPressedLastFrame = false;
     float m_JumpBufferTime = 0.0f;
     const float JUMP_BUFFER_DURATION = 5.0f / 60.0f; // 約 0.083 秒
     bool m_JumpBuffered = false;
+    bool m_XPressedLastFrame = false;
     float m_DashBufferTime = 0.0f;
     bool m_DashBuffered = false;
+
+    // 鎖定左右鍵的計時器（秒）
+    float m_WallJumpLockTimer = 0.0f;
+    // 鎖定時長，可調
+    static constexpr float WALL_JUMP_LOCK_DURATION = 0.3f;
 
 };
 

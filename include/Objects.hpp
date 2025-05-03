@@ -6,17 +6,17 @@
 #include <string>
 #include "Util/GameObject.hpp"
 
-class Characters : public Util::GameObject {
+class Objects : public Util::GameObject {
 public:
-    explicit Characters(const std::string& ImagePath);
+    explicit Objects(const std::string& ImagePath);
 
-    Characters(const Characters&) = delete;
+    Objects(const Objects&) = delete;
 
-    Characters(Characters&&) = delete;
+    Objects(Objects&&) = delete;
 
-    Characters& operator=(const Characters&) = delete;
+    Objects& operator=(const Objects&) = delete;
 
-    Characters& operator=(Characters&&) = delete;
+    Objects& operator=(Objects&&) = delete;
 
     [[nodiscard]] const std::string& GetImagePath() const { return m_ImagePath; }
 
@@ -30,7 +30,7 @@ public:
 
     void SetCoordinate(const glm::vec2& Coordinate);
 
-    bool IfCollidesCharacter(const std::shared_ptr<Characters>& other) const;
+    bool IfCollidesObject(const std::shared_ptr<Objects>& other) const;
 
     // TODO: Add and implement more methods and properties as needed to finish Giraffe Adventure.
     void SetScale(float scaleX, float scaleY);

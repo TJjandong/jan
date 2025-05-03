@@ -4,12 +4,12 @@
 
 #include "Util/Image.hpp"
 
-Characters::Characters(const std::string& ImagePath) {
+Objects::Objects(const std::string& ImagePath) {
     SetImage(ImagePath);
     ResetPosition();
 }
 
-void Characters::SetImage(const std::string& ImagePath) {
+void Objects::SetImage(const std::string& ImagePath) {
     m_ImagePath = ImagePath;
 
     if (ImagePath.empty()) {
@@ -29,17 +29,17 @@ void Characters::SetImage(const std::string& ImagePath) {
     }
 }
 
-void Characters::SetScale(float scaleX, float scaleY) {
+void Objects::SetScale(float scaleX, float scaleY) {
     m_Transform.scale = {scaleX, scaleY};
 }
 
-void Characters::SetCoordinate(const glm::vec2& Coordinate) {
+void Objects::SetCoordinate(const glm::vec2& Coordinate) {
     m_Transform.translation = Coordinate;
     m_Position.x = (m_Transform.translation.x + 384) / 6.0f;
     m_Position.y = (m_Transform.translation.y + 384) / 6.0f;
 }
 
-bool Characters::IfCollidesCharacter(const std::shared_ptr<Characters>& other) const {
+bool Objects::IfCollidesObject(const std::shared_ptr<Objects>& other) const {
     glm::vec2 posA = m_Transform.translation;
     glm::vec2 sizeA = m_Transform.scale; // 假設這表示物件的寬和高
 

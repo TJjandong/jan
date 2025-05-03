@@ -58,11 +58,11 @@ private:
     Phase m_Phase = Phase::Phase00;
 
     std::shared_ptr<MainCharacter> m_madline;
-    std::shared_ptr<Characters> m_bounce;
-    std::shared_ptr<Characters> m_cloud;
-    std::shared_ptr<Characters> m_box;
-    std::shared_ptr<Characters> m_chest;
-    std::shared_ptr<Characters> m_GoalChest;
+    std::shared_ptr<Objects> m_bounce;
+    std::shared_ptr<Objects> m_cloud;
+    std::shared_ptr<Objects> m_box;
+    std::shared_ptr<Objects> m_chest;
+    std::shared_ptr<Objects> m_GoalChest;
 
     std::shared_ptr<AnimatedCharacter> m_strawberry;
     std::shared_ptr<AnimatedCharacter> m_FlyingStrawberry;

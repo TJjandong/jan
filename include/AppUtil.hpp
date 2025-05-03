@@ -4,7 +4,7 @@
 #include "Objects.hpp"
 #include "BackgroundImage.hpp"
 
-[[nodiscard]]inline bool isWall(const Characters& character) {
+[[nodiscard]]inline bool isWall(const Objects& character) {
     auto position = character.GetPosition();
     return position.y > -90 && position.y < 93 && position.x > 50 && position.x < 233;
 }
