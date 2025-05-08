@@ -48,6 +48,7 @@ add_executable(${PROJECT_NAME}
         src/MainCharacter.cpp
         src/PhaseResourceManager.cpp
         include/Trap.hpp
+        src/Trap.cpp
 )
 
 if(MSVC)

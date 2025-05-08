@@ -19,7 +19,7 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
     const float max_speed = 4.0f;
     const float acceleration = 6.0f;
     const float friction = 4.0f;
-    const float Jumpforce = 18.0f;         // 跳躍時的初速度
+    const float Jumpforce = 18.3f;         // 跳躍時的初速度
     const float Dashforce = 30.0f;           // 衝刺時的初速度
     float Gravity = 0.9f;            // 重力加速度，每幀施加
     const float max_fall_speed = -max_speed * 2.4f;  // 限制垂直下落速度
@@ -305,4 +305,30 @@ bool MainCharacter::RectOverlap(const glm::vec2 &a, const glm::vec2 &sizeA,
                                   const glm::vec2 &b, const glm::vec2 &sizeB) {
     return (a.x < b.x + sizeB.x && a.x + sizeA.x > b.x &&
             a.y < b.y + sizeB.y && a.y + sizeA.y > b.y);
+}
+
+void MainCharacter::KillInstant() {
+    // 把角色搬回起點
+    ReSpawn();
+
+    // 歸零速度
+    velocity_x = 0.0f;
+    velocity_y = 0.0f;
+
+    // 重置跳躍、衝刺等狀態
+    IsGround       = false;
+    IsJumping      = false;
+    Dashed         = false;
+    isDashing      = false;
+    Isgrabbing     = false;
+    nearLeftWall   = false;
+    nearRightWall  = false;
+
+    // 重置緩衝、郊狼時間
+    m_JumpBuffered = false;
+    m_CoyoteTime   = 0.0f;
+    m_WallJumpLockTimer = 0.0f;
+
+    // 如果你有播放死亡動畫或音效，可以在這裡呼叫
+    // PlayDeathAnimation();
 }

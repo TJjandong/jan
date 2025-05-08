@@ -7,6 +7,7 @@
 #include "Util/Logger.hpp"
 #include "Util/Image.hpp"
 #include "InvisibleWall.hpp"
+#include "Trap.hpp"
 #include "Objects.hpp"
 
 PhaseResourceManager::PhaseResourceManager() {
@@ -56,5 +57,37 @@ void PhaseResourceManager::SetWall(const int phase) {
         row++;
     }
     file.close();
+    SetTraps(phase);
     LOG_DEBUG("牆壁資料讀取完成，共建立 {} 個隱形牆", m_Walls.size());
+}
+
+void PhaseResourceManager::SetTraps(int phase) {
+    std::string trapFilePath = "C:/Users/jan20/jan/Resources/WallMatrix/" + std::to_string(phase) + ".txt";
+    std::ifstream file(trapFilePath);
+    if (!file) return;
+
+    m_Traps.clear();
+    std::string line;
+    int row = 0;
+    const float cellSize = 48.0f;
+    glm::vec2 origin(-408.0f, 360.0f);
+
+    while (std::getline(file, line)) {
+        std::istringstream iss(line);
+        int cell, col = 0;
+        while (iss >> cell) {
+            if (cell == 2) {
+                glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
+                auto trap = std::make_shared<Trap>(pos, Trap::Type::Spike );
+                trap->SetCoordinate(pos);
+                trap->SetScale(cellSize, cellSize/4);
+                trap->SetZIndex(40);
+                m_Traps.push_back(trap);
+            }
+            ++col;
+        }
+        ++row;
+    }
+    LOG_DEBUG("陷阱資料讀取完成");
+    file.close();
 }

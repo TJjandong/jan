@@ -18,6 +18,10 @@ public:
         for (auto& wall : m_Walls) {
             children.push_back(wall);
         }
+
+        for (auto& trap : m_Traps) {
+            children.push_back(trap);
+        }
         return children;;
     }
 

@@ -19,7 +19,19 @@ public:
 
     static bool RectOverlap(const glm::vec2 &a, const glm::vec2 &sizeA, const glm::vec2 &b, const glm::vec2 &sizeB);
 
+    void KillInstant();
+
+    void SetSpawnPoint(const glm::vec2 &spawn) {
+        Objects::SetCoordinate(spawn);
+        ResetCoordinate = spawn;
+    }
+
+    void ReSpawn() {
+        m_Transform.translation = ResetCoordinate;
+    }
+
 private:
+    glm::vec2 ResetCoordinate;
     float velocity_x = 0;
     float velocity_y = 0;
     bool IsGround = false;
