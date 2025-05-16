@@ -49,6 +49,9 @@ add_executable(${PROJECT_NAME}
         src/PhaseResourceManager.cpp
         include/Trap.hpp
         src/Trap.cpp
+        include/GoalFlag.hpp
+        include/Bounce.h
+        include/Bounce.h
 )
 
 if(MSVC)

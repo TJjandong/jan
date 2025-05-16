@@ -1,6 +1,12 @@
 #ifndef MAIN_CHARACTER_HPP
 #define MAIN_CHARACTER_HPP
 #include "Objects.hpp"
+#include "util/Input.hpp"
+#include "Util/Time.hpp"
+#include "InvisibleWall.hpp"
+#include <string>
+#include <iostream>
+#include <cmath>
 
 class MainCharacter : public Objects {
 public:
@@ -14,6 +20,8 @@ public:
     };
 
     void DetectSideCollisions(const std::vector<std::shared_ptr<Util::GameObject>> &walls, CollisionFlags &flags) const;
+
+    bool IfCollidesObject(const std::shared_ptr<Objects>& other) const;
 
     void movement(const std::vector<std::shared_ptr<Util::GameObject>>& walls);
 
@@ -30,6 +38,8 @@ public:
         m_Transform.translation = ResetCoordinate;
     }
 
+    void SetJump(float BounceForce);
+
 private:
     glm::vec2 ResetCoordinate;
     float velocity_x = 0;
@@ -38,7 +48,6 @@ private:
     bool IsJumping = false;
     bool Dashed = false;
     bool isDashing = false;
-    bool LeanWall = false;
     bool Isgrabbing = false;
     bool nearLeftWall = false;
     bool nearRightWall = false;
@@ -53,13 +62,12 @@ private:
     const float JUMP_BUFFER_DURATION = 5.0f / 60.0f; // 約 0.083 秒
     bool m_JumpBuffered = false;
     bool m_XPressedLastFrame = false;
-    float m_DashBufferTime = 0.0f;
     bool m_DashBuffered = false;
 
     // 鎖定左右鍵的計時器（秒）
     float m_WallJumpLockTimer = 0.0f;
     // 鎖定時長，可調
-    static constexpr float WALL_JUMP_LOCK_DURATION = 0.3f;
+    static constexpr float WALL_JUMP_LOCK_DURATION = 0.25f;
 
 };
 

@@ -2,8 +2,10 @@
 #define OBJECTS_HPP
 
 #include <utility>
-
+#include <iostream>
 #include <string>
+
+#include "Util/Image.hpp"
 #include "Util/GameObject.hpp"
 
 class Objects : public Util::GameObject {
@@ -29,8 +31,6 @@ public:
     void SetImage(const std::string& ImagePath);
 
     void SetCoordinate(const glm::vec2& Coordinate);
-
-    bool IfCollidesObject(const std::shared_ptr<Objects>& other) const;
 
     // TODO: Add and implement more methods and properties as needed to finish Giraffe Adventure.
     void SetScale(float scaleX, float scaleY);

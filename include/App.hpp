@@ -2,12 +2,19 @@
 #define APP_HPP
 
 #include "pch.hpp" // IWYU pragma: export
+#include <iostream>
+#include <ostream>
 
+#include "Util/Image.hpp"
+#include "Util/Input.hpp"
+#include "Util/Keycode.hpp"
+#include "Util/Logger.hpp"
 #include "Util/Renderer.hpp"
 #include "Objects.hpp"
 #include "PhaseResourceManager.hpp"
 #include "AnimatedObjects.hpp"
 #include "Main_Character.hpp"
+#include "AppUtil.hpp"
 
 class App {
 public:
@@ -72,6 +79,10 @@ private:
     std::shared_ptr<PhaseResourceManager> m_PRM;
 
     bool m_EnterDown = false;
+
+    //AppUtil的友元
+    friend void AppUtil::LoadPhase(App&);
+    friend void AppUtil::TransitionToNextPhase(App&);
 };
 
 #endif

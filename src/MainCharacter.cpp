@@ -1,11 +1,4 @@
-#include "Objects.hpp"
-#include "util/Input.hpp"
 #include "Main_Character.hpp"
-#include "Util/Time.hpp"
-#include "InvisibleWall.hpp"
-#include <string>
-#include <iostream>
-#include <cmath>
 
 #define PressC Util::Input::IsKeyPressed(Util::Keycode::C)
 #define PressX Util::Input::IsKeyPressed(Util::Keycode::X)
@@ -16,7 +9,7 @@
 
 void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>>& walls) {
     // 定義移動與物理參數
-    const float max_speed = 4.0f;
+    const float max_speed = 4.3f;
     const float acceleration = 6.0f;
     const float friction = 4.0f;
     const float Jumpforce = 18.3f;         // 跳躍時的初速度
@@ -123,9 +116,9 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
             if (velocity_x < -max_speed) velocity_x = -max_speed;
         }else {
             if (velocity_x > 0) {
-                velocity_x = std::max(0.0f, velocity_x - friction * 0.4f);
+                velocity_x = std::max(max_speed , velocity_x - friction * 0.4f);
             } else if (velocity_x < 0) {
-                velocity_x = std::min(0.0f, velocity_x + friction * 0.4f);
+                velocity_x = std::min(-max_speed , velocity_x + friction * 0.4f);
             }
             appliedInput = true;
         }
@@ -170,9 +163,14 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
         }
     }
 
-    // 更新 Coyote Time
-    if (IsGround) m_CoyoteTime = COYOTE_TIME_TOLERANCE;
-    else m_CoyoteTime = std::max(m_CoyoteTime - dt_s, 0.0f);
+    // --- 郊狼時間（Coyote Time）更新 ---
+    if (IsGround) {
+        m_CoyoteTime = COYOTE_TIME_TOLERANCE;
+    } else {
+        // 減去經過的秒數 dt_s
+        float dt_s = Util::Time::GetDeltaTimeMs() * 0.001f;
+        m_CoyoteTime = std::max(m_CoyoteTime - dt_s, 0.0f);
+    }
 
     // 處理跳躍輸入緩衝：按下 C 後開始計時
     if (cJustPressed) {
@@ -190,7 +188,7 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
         m_WallJumpLockTimer = std::max(0.0f, m_WallJumpLockTimer - dt_s);
     }
 
-    if (m_JumpBuffered && !IsJumping &&((IsGround && m_CoyoteTime>0) || (!IsGround && (nearLeftWall||nearRightWall)))) {
+    if (m_JumpBuffered && !IsJumping &&((IsGround && m_CoyoteTime > 0.0f) || (!IsGround && (nearLeftWall||nearRightWall)))) {
         // 地面跳
         if (IsGround) {
             velocity_y = Jumpforce;
@@ -299,6 +297,16 @@ void MainCharacter::DetectSideCollisions(const std::vector<std::shared_ptr<Util:
                 flags.down = true;
         }
     }
+}
+
+bool MainCharacter::IfCollidesObject(const std::shared_ptr<Objects>& other) const {
+    glm::vec2 posA = GetCoordinate() + glm::vec2{0, 10};
+    glm::vec2 sizeA = {30, 27};
+
+    glm::vec2 posB = other->GetCoordinate(); // 另一個物件的座標
+    glm::vec2 sizeB = other->m_Transform.scale;
+
+    return RectOverlap(posA, sizeA, posB, sizeB);
 }
 
 bool MainCharacter::RectOverlap(const glm::vec2 &a, const glm::vec2 &sizeA,

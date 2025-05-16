@@ -1,5 +1,6 @@
 set(SRC_FILES
     App.cpp
+        AppUtil.cpp
         MainCharacter.cpp
         Objects.cpp
         PhaseResourceManager.cpp
@@ -8,6 +9,7 @@ set(SRC_FILES
 
 set(INCLUDE_FILES
     App.hpp
+        AppUtil.hpp
         BackgroundImage.hpp
         InvisibleWall.hpp
         Main_Character.hpp

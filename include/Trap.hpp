@@ -7,7 +7,7 @@
 
 class Trap : public Objects {
 public:
-    enum class Type { Spike, Fall};
+    enum class Type { Spike, SpikeBlock};
     Trap(const glm::vec2& coord, Type t)
       : Objects(""), m_Type(t)
     {
