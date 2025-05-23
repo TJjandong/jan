@@ -7,9 +7,9 @@
 
 class Trap : public Objects {
 public:
-    enum class Type { Spike, SpikeBlock};
-    Trap(const glm::vec2& coord, Type t)
-      : Objects(""), m_Type(t)
+    enum class Orientation { Down, Up, Left, Right };
+    Trap(const glm::vec2& coord, Orientation orientation)
+    : Objects("")
     {
         SetCoordinate(coord);
         SetScale(1.0f, 1.0f);
@@ -17,9 +17,6 @@ public:
     }
 
     void OnCollide(MainCharacter& player);
-
-private:
-    Type m_Type;
 };
 
 #endif //TRAP_HPP

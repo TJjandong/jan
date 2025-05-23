@@ -42,16 +42,16 @@ void PhaseResourceManager::SetBoundary(const int phase) {
                 glm::vec2 position = origin + glm::vec2(col * cellSize, -row * cellSize);
                 auto wall = std::make_shared<InvisibleWall>(position);
                 m_Walls.push_back(wall);
-            }else if (cell == 2) {      //Trap
+            }else if (cell == 2) {      //Trap下
                 glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
-                auto trap = std::make_shared<Trap>(pos, Trap::Type::Spike );
-                trap->SetScale(1.0f, 0.25f);
+                auto trap = std::make_shared<Trap>(pos, Trap::Orientation::Down );
+                trap -> SetScale(1.0f, 0.33f);
                 m_Traps.push_back(trap);
-            }else if (cell == 3) {      //Trap
+            }else if (cell == 3) {      //Trap上
                 glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
-                auto trap = std::make_shared<Trap>(pos, Trap::Type::SpikeBlock );
-                trap->SetCoordinate(pos + glm::vec2{-6.0f, 0});
-                trap->SetScale(1.25f,  1.25f);
+                auto trap = std::make_shared<Trap>(pos, Trap::Orientation::Up );
+                trap -> SetCoordinate(pos + glm::vec2(0.0f, 32.0f));
+                trap -> SetScale(1.0f, 0.33f);
                 m_Traps.push_back(trap);
             }else if (cell == 4) {
                 // 每一個 4 代表一個「彈簧」
