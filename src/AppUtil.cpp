@@ -5,22 +5,23 @@
 
 namespace AppUtil {
 
+    void removeObjects(App& app) {
+        app.m_Root.RemoveChild(app.m_madline);
+        auto oldChildren = app.m_PRM->GetChildren();
+        for (auto& obj : oldChildren) {
+            app.m_Root.RemoveChild(obj);
+        }
+    }
+
     void LoadPhase(App& app) {
         // 1) 設定關卡編號
         int phaseIndex = static_cast<int>(app.m_Phase);
 
         // 2) 讓 ResourceManager 讀取對應的地圖／陷阱／目標
         app.m_PRM->SetBoundary(phaseIndex);  // 讀取 0.txt, 1.txt ... :contentReference[oaicite:1]{index=1}:contentReference[oaicite:2]{index=2}
-
-        // 3) 清空 Renderer，把角色和新的所有物件加回去
-        app.m_Root.RemoveChild(app.m_madline);
-        for (auto& obj : app.m_PRM->GetChildren()) {
-            app.m_Root.RemoveChild(obj);
-        }
-
         app.m_Root.AddChild(app.m_madline);
         app.m_Root.AddChildren(app.m_PRM->GetChildren());  // 背景、牆、陷阱、目標 :contentReference[oaicite:3]{index=3}
-        // 4) 重設角色重生點（可選）：每關可以有不同的 spawn point
+        // 3) 重設角色重生點（可選）：每關可以有不同的 spawn point
         switch (phaseIndex) {
             case 1:
                 app.m_madline->SetSpawnPoint({-300.0f, -250.0f});
@@ -37,11 +38,14 @@ namespace AppUtil {
         int next = static_cast<int>(app.m_Phase) + 1;
         app.m_Phase = static_cast<Phase>(next);
 
-        // 2) 讓 PhaseResourceManager 換背景圖
+        // 2) 清空 Renderer，把角色和新的所有物件加回去
+        removeObjects(app);
+
+        // 3) 讓 PhaseResourceManager 換背景圖
         app.m_PRM->NextPhase(next);            // 背景圖由 phase0.png→ … :contentReference[oaicite:4]{index=4}:contentReference[oaicite:5]{index=5}
 
 
-        // 3) 再次呼叫 LoadPhase 載入新的地圖、道具、牆壁、陷阱、目標
+        // 4) 再次呼叫 LoadPhase 載入新的地圖、道具、牆壁、陷阱、目標
         LoadPhase(app);
     }
 

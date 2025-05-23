@@ -12,8 +12,8 @@ public:
       : Objects(""), m_Type(t)
     {
         SetCoordinate(coord);
-        SetScale(48.0f, 48.0f);
-        SetZIndex(30);
+        SetScale(1.0f, 1.0f);
+        SetZIndex(40);
     }
 
     void OnCollide(MainCharacter& player);

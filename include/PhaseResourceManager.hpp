@@ -1,10 +1,11 @@
 #ifndef PHASE_MANAGER_HPP
 #define PHASE_MANAGER_HPP
-#include "Objects.hpp"
 #include "Trap.hpp"
 #include "GoalFlag.hpp"
+#include "Bounce.hpp"
 #include "BackgroundImage.hpp"
 #include "InvisibleWall.hpp"
+#include "WoodBox.hpp"
 
 #include "Util/Logger.hpp"
 #include "Util/GameObject.hpp"
@@ -30,8 +31,22 @@ public:
             children.push_back(trap);
         }
 
-        for (auto& g : m_Goals) {
-            children.push_back(g);
+        for (auto& bounce : m_Bounces) {
+            children.push_back(bounce);
+        }
+
+        for (auto& goal : m_Goals) {
+            children.push_back(goal);
+        };
+
+        for (auto& boxes : m_WoodBoxes) {
+            if (boxes)
+                children.push_back(boxes);
+        };
+
+        for (auto& balloons : m_Balloons) {
+            if (balloons)
+                children.push_back(balloons);
         };
         return children;;
     }
@@ -40,15 +55,24 @@ public:
 
     void SetBoundary(const int phase);  //wall & trap
 
+    // PhaseResourceManager.hpp
     std::vector<std::shared_ptr<Util::GameObject>> GetWall() const {
-        return m_Walls;
+        std::vector<std::shared_ptr<Util::GameObject>> walls = m_Walls;
+        for (auto& box : m_WoodBoxes) {
+            walls.push_back(box);
+        }
+        return walls;
     }
+
 
 private:
     std::shared_ptr<BackgroundImage> m_Background;
     std::vector<std::shared_ptr<Util::GameObject>> m_Walls;     // 儲存所有牆壁物件
     std::vector<std::shared_ptr<Util::GameObject>> m_Traps;
     std::vector<std::shared_ptr<Util::GameObject>> m_Goals;
+    std::vector<std::shared_ptr<Util::GameObject>> m_Bounces;
+    std::vector<std::shared_ptr<Util::GameObject>> m_WoodBoxes;
+    std::vector<std::shared_ptr<Util::GameObject>> m_Balloons;
 };
 
 

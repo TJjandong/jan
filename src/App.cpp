@@ -5,7 +5,7 @@ void App::Start() {
 
 
     // 設置角色圖片
-    m_madline = std::make_shared<MainCharacter>(GA_RESOURCE_DIR "Character/standR.png");
+    m_madline = std::make_shared<MainCharacter>(RESOURCE_DIR "/Image/Character/standR.png");
     m_madline->SetSpawnPoint({-300.0f, -150.0f});  // 確保角色在可見範圍
     m_madline->SetZIndex(100);  // 設置角色在頂層
     m_Root.AddChild(m_madline);  // 添加角色到根物件
@@ -22,6 +22,7 @@ void App::Start() {
 void App::Update() {
 
     //TODO: do your things here and delete this line <3
+    float dt_s = Util::Time::GetDeltaTimeMs() * 0.001f;  // 毫秒轉秒
     m_Root.Update();
     m_madline->Draw();
 
@@ -35,8 +36,6 @@ void App::Update() {
     // Assuming m_Root.AddText() is a function that adds text to be rendered on the screen
     //std::cout << coordinatesText << std::endl;
 
-    m_madline->movement(m_PRM->GetWall());
-
     for (auto& child : m_PRM->GetChildren()) {
         if (auto trap = std::dynamic_pointer_cast<Trap>(child)) {
             if (m_madline->IfCollidesObject(trap)) {
@@ -49,7 +48,27 @@ void App::Update() {
                 break;
             }
         }
+        if (auto bounce = std::dynamic_pointer_cast<Bounce>(child)) {
+            if (m_madline->IfCollidesObject(bounce)) {
+                bounce->OnCollide(*m_madline);
+            }
+            bounce->Update(dt_s);
+        }
+        if (auto box = std::dynamic_pointer_cast<WoodBox>(child)) {
+            if (box->IsIntact() && m_madline->IfCollidesObject(box)) {
+                box->OnCollide();               // 崩壞＋隱形牆效果移除
+            }
+            box->Update(dt_s);                  // 倒數計時、1.5s 後自動恢復
+        }
+        if (auto balloon = std::dynamic_pointer_cast<Balloon>(child)) {
+            if (m_madline->IfCollidesObject(balloon)) {
+                balloon->OnCollide(*m_madline);
+            }
+            balloon->Update(dt_s);
+        }
     }
+
+    m_madline->movement(m_PRM->GetWall());
 
     // 假設你在 PhaseResourceManger 中另外提供 GetWalls() 方法，只回傳牆壁 vector
     /*

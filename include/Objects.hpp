@@ -35,13 +35,18 @@ public:
     // TODO: Add and implement more methods and properties as needed to finish Giraffe Adventure.
     void SetScale(float scaleX, float scaleY);
 
-
+    bool IsCollidable() {
+        return m_Collides;
+    };
 
 private:
     void ResetPosition() { m_Transform.translation = {0, 0}; }
 
     std::string m_ImagePath;
     glm::vec2 m_Position{ (m_Transform.translation.x + 384) / 6.0f , (m_Transform.translation.y + 384) / 6.0f };  // 存儲位置數據
+
+protected:
+    bool m_Collides = true;
 };
 
 #endif

@@ -3,13 +3,12 @@
 
 #include "Util/GameObject.hpp"
 #include "Util/Image.hpp"
-#define GA_RESOURCE_DIR "C:/Users/jan20/jan/Resources/Image/"
 
 class BackgroundImage : public Util::GameObject {
 
 public:
     BackgroundImage() : GameObject(
-            std::make_unique<Util::Image>(GA_RESOURCE_DIR"Background/phase0.png"), 10) {
+            std::make_unique<Util::Image>(RESOURCE_DIR"/Image/Background/phase0.png"), 10) {
     }
 
     void NextPhase(const int phase) {
@@ -19,7 +18,7 @@ public:
 
 private:
     inline std::string ImagePath(const int phase) {
-        return GA_RESOURCE_DIR"Background/phase" + std::to_string(phase) + ".png";
+        return RESOURCE_DIR"/Image/Background/phase" + std::to_string(phase) + ".png";
     }
 };
 

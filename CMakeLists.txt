@@ -50,8 +50,13 @@ add_executable(${PROJECT_NAME}
         include/Trap.hpp
         src/Trap.cpp
         include/GoalFlag.hpp
-        include/Bounce.h
-        include/Bounce.h
+        include/Bounce.hpp
+        include/Balloon.hpp
+        include/WoodBox.hpp
+        src/Bounce.cpp
+        src/WoodBox.cpp
+        src/Balloon.cpp
+        include/Cloud.hpp
 )
 
 if(MSVC)

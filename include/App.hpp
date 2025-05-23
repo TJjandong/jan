@@ -10,11 +10,13 @@
 #include "Util/Keycode.hpp"
 #include "Util/Logger.hpp"
 #include "Util/Renderer.hpp"
+#include "Util/Time.hpp"
 #include "Objects.hpp"
 #include "PhaseResourceManager.hpp"
 #include "AnimatedObjects.hpp"
 #include "Main_Character.hpp"
 #include "AppUtil.hpp"
+#include "Balloon.hpp"
 
 class App {
 public:
@@ -65,22 +67,20 @@ private:
     Phase m_Phase = Phase::Phase00;
 
     std::shared_ptr<MainCharacter> m_madline;
-    std::shared_ptr<Objects> m_bounce;
-    std::shared_ptr<Objects> m_cloud;
-    std::shared_ptr<Objects> m_box;
-    std::shared_ptr<Objects> m_chest;
-    std::shared_ptr<Objects> m_GoalChest;
 
-    std::shared_ptr<AnimatedCharacter> m_strawberry;
-    std::shared_ptr<AnimatedCharacter> m_FlyingStrawberry;
-    std::shared_ptr<AnimatedCharacter> m_key;
-    std::shared_ptr<AnimatedCharacter> m_Balloon;
+    //道具物件等交給PhaseResource生成
+
+    std::shared_ptr<AnimatedObjects> m_strawberry;
+    std::shared_ptr<AnimatedObjects> m_FlyingStrawberry;
+    std::shared_ptr<AnimatedObjects> m_key;
+    std::shared_ptr<AnimatedObjects> m_Balloon;
 
     std::shared_ptr<PhaseResourceManager> m_PRM;
 
     bool m_EnterDown = false;
 
     //AppUtil的友元
+    friend void AppUtil::removeObjects(App&);
     friend void AppUtil::LoadPhase(App&);
     friend void AppUtil::TransitionToNextPhase(App&);
 };

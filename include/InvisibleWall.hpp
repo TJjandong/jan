@@ -11,7 +11,8 @@ public:
         : Objects("")
     {
         SetCoordinate(coordinate);  // 設定牆壁位置
-        SetZIndex(20);  // 設定較低的 Z-Index
+        SetScale(1.0f, 1.0f);
+        SetZIndex(50);  // 設定較低的 Z-Index
     }
 
 

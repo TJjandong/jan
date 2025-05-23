@@ -1,21 +1,30 @@
 set(SRC_FILES
     App.cpp
         AppUtil.cpp
+        AnimatedObjects.cpp
         MainCharacter.cpp
         Objects.cpp
         PhaseResourceManager.cpp
         Trap.cpp
+        WoodBox.cpp
+        Bounce.cpp
+        Balloon.cpp
 )
 
 set(INCLUDE_FILES
     App.hpp
         AppUtil.hpp
+        AnimatedObjects.hpp
         BackgroundImage.hpp
         InvisibleWall.hpp
         Main_Character.hpp
         Objects.hpp
         PhaseResourceManager.hpp
         Trap.hpp
+        Bounce.hpp
+        Balloon.hpp
+        WoodBox.hpp
+        Cloud.hpp
 )
 
 set(TEST_FILES

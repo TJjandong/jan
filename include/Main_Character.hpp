@@ -1,9 +1,11 @@
 #ifndef MAIN_CHARACTER_HPP
 #define MAIN_CHARACTER_HPP
 #include "Objects.hpp"
+#include "AnimatedObjects.hpp"
 #include "util/Input.hpp"
 #include "Util/Time.hpp"
 #include "InvisibleWall.hpp"
+#include "WoodBox.hpp"
 #include <string>
 #include <iostream>
 #include <cmath>
@@ -19,9 +21,20 @@ public:
         bool down = false;
     };
 
-    void DetectSideCollisions(const std::vector<std::shared_ptr<Util::GameObject>> &walls, CollisionFlags &flags) const;
+    // 水平碰撞並移動，回傳是否有任何左右碰撞
+    CollisionFlags MoveX(const std::vector<std::shared_ptr<Util::GameObject>>& walls, float dx);
+
+    // 垂直碰撞並移動，回傳是否有上下碰撞
+    CollisionFlags MoveY(const std::vector<std::shared_ptr<Util::GameObject>>& walls, float dy);
+
+    std::shared_ptr<Util::GameObject> FindCollision(
+        const std::vector<std::shared_ptr<Util::GameObject>>& walls,
+        const glm::vec2& testPos
+    );
 
     bool IfCollidesObject(const std::shared_ptr<Objects>& other) const;
+
+    bool IfCollidesObject(const std::shared_ptr<AnimatedObjects>& other) const;
 
     void movement(const std::vector<std::shared_ptr<Util::GameObject>>& walls);
 
@@ -30,7 +43,7 @@ public:
     void KillInstant();
 
     void SetSpawnPoint(const glm::vec2 &spawn) {
-        Objects::SetCoordinate(spawn);
+        SetCoordinate(spawn);
         ResetCoordinate = spawn;
     }
 
@@ -38,7 +51,9 @@ public:
         m_Transform.translation = ResetCoordinate;
     }
 
-    void SetJump(float BounceForce);
+    void BounceJump();
+
+    void ResetDash();
 
 private:
     glm::vec2 ResetCoordinate;
@@ -53,6 +68,7 @@ private:
     bool nearRightWall = false;
     float dashTimer = 0.0f;           // 單位：毫秒
     const float dashDuration = 200.0f; // 衝刺持續 200 毫秒，可依需求調整
+    float bounceforce = 23.0f;
 
     float m_CoyoteTime = 0.0f; // 剩餘郊狼時間
     const float COYOTE_TIME_TOLERANCE = 1.5f; // 最大容許時間（秒）

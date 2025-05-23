@@ -1,3 +1,4 @@
+#include "AnimatedObjects.hpp"
 #include "Main_Character.hpp"
 
 #define PressC Util::Input::IsKeyPressed(Util::Keycode::C)
@@ -15,7 +16,7 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
     const float Jumpforce = 18.3f;         // 跳躍時的初速度
     const float Dashforce = 30.0f;           // 衝刺時的初速度
     float Gravity = 0.9f;            // 重力加速度，每幀施加
-    const float max_fall_speed = -max_speed * 2.4f;  // 限制垂直下落速度
+    const float max_fall_speed = -max_speed * 2.1f;  // 限制垂直下落速度
     nearLeftWall  = false;
     nearRightWall = false;
 
@@ -34,34 +35,6 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
 
     // 儲存原始位置
     glm::vec2 oldPos = GetCoordinate();
-
-    // 1. 側邊碰撞偵測（用來牆滑、抓牆）
-    CollisionFlags sideFlags;
-    DetectSideCollisions(walls, sideFlags);
-    Isgrabbing = (sideFlags.left || sideFlags.right) && !IsGround;
-
-    // 角色碰撞箱 & 探测参数
-    glm::vec2 charPos   = GetCoordinate() + glm::vec2{0,10};
-    glm::vec2 charSize  = {30,27};
-    constexpr float WALL_RANGE = 12.0f;
-
-    // 左、右探测箱
-    glm::vec2 probeL_pos  = { charPos.x - WALL_RANGE,   charPos.y };
-    glm::vec2 probeL_size = { WALL_RANGE,               charSize.y };
-    glm::vec2 probeR_pos  = { charPos.x + charSize.x,   charPos.y };
-    glm::vec2 probeR_size = { WALL_RANGE,               charSize.y };
-
-    for (auto &w : walls) {
-        auto wall = std::dynamic_pointer_cast<InvisibleWall>(w);
-        if (!wall) continue;
-        glm::vec2 wallPos  = wall->GetCoordinate();
-        glm::vec2 wallSize = wall->m_Transform.scale;
-
-        if (RectOverlap(probeL_pos, probeL_size, wallPos, wallSize))
-            nearLeftWall = true;
-        if (RectOverlap(probeR_pos, probeR_size, wallPos, wallSize))
-            nearRightWall = true;
-    }
 
     // 處理衝刺輸入緩衝（X鍵）
     if ((xJustPressed || m_DashBuffered) && !Dashed) {
@@ -83,10 +56,6 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
 
         IsJumping = true;
     }
-
-    CollisionFlags flags;
-
-    DetectSideCollisions(walls, flags);
 
     // 更新衝刺計時器：當處於衝刺狀態時不受 max_speed 限制
     if (isDashing) {
@@ -137,31 +106,19 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
         if (velocity_x > max_speed) velocity_x -= friction * 0.6f;
         if (velocity_x < -max_speed) velocity_x += friction * 0.6f;
         if (velocity_y > max_speed) velocity_y -= friction * 0.8f;
-        if (velocity_y < -max_speed) velocity_y += friction * 0.8f;
+        if (velocity_y < max_fall_speed) velocity_y += friction * 0.8f;
     }
 
-    // 計算新的水平位置
-    glm::vec2 newPos = oldPos;
-    newPos.x += velocity_x;
-    // 檢查下一步的水平碰撞
-    {
-        glm::vec2 testPos = newPos;
-        SetCoordinate({testPos.x, oldPos.y});
-        CollisionFlags horizontalFlags;
-        DetectSideCollisions(walls, horizontalFlags);
-        if (horizontalFlags.left || horizontalFlags.right) {
-            newPos.x = oldPos.x;
-            velocity_x = 0;
-            if (!IsGround) {
-                Isgrabbing = true;
-                if (horizontalFlags.left) nearLeftWall = true;
-                if (horizontalFlags.right) nearRightWall = true;
-                IsJumping = false;
-            }
-        }else {
-            Isgrabbing = false;
-        }
-    }
+    // 2) 碰撞與移動拆成兩步：水平、再垂直
+    auto hFlags = MoveX(walls, velocity_x);
+    // 更新抓牆狀態
+    nearLeftWall = hFlags.left;
+    nearRightWall = hFlags.right;
+    Isgrabbing     = (nearLeftWall || nearRightWall) && !IsGround;
+    if (Isgrabbing) IsJumping = false;
+
+    // 更新新的垂直位置
+    auto vFlags = MoveY(walls, velocity_y);
 
     // --- 郊狼時間（Coyote Time）更新 ---
     if (IsGround) {
@@ -188,7 +145,7 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
         m_WallJumpLockTimer = std::max(0.0f, m_WallJumpLockTimer - dt_s);
     }
 
-    if (m_JumpBuffered && !IsJumping &&((IsGround && m_CoyoteTime > 0.0f) || (!IsGround && (nearLeftWall||nearRightWall)))) {
+    if (m_JumpBuffered && !IsJumping && ((IsGround && m_CoyoteTime > 0.0f) || Isgrabbing)) {
         // 地面跳
         if (IsGround) {
             velocity_y = Jumpforce;
@@ -228,75 +185,98 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
         }
     }
 
-    // 更新新的垂直位置
-    newPos.y += velocity_y;
-    // 檢查下一步的垂直碰撞
-    {
-        glm::vec2 testPos = newPos;
-        SetCoordinate({newPos.x, testPos.y});
-        CollisionFlags verticalFlags;
-        DetectSideCollisions(walls, verticalFlags);
-        if (verticalFlags.up || verticalFlags.down) {
-            newPos.y = oldPos.y;
-            velocity_y = 0;
-            if (verticalFlags.down) {
-                // 當角色碰到底部（地面），視為在地面上
-                IsGround = true;
-                // 衝刺結束後重置衝刺標誌，避免無限衝刺
-                Dashed = false;
-                isDashing = false;
-                IsJumping = false;
-            }
-        } else if (!verticalFlags.down) {
-            IsGround = false;
-        }
-    }
-
     // 更新角色最終位置
-    SetCoordinate(newPos);
+    //SetCoordinate(newPos);
 }
 
-void MainCharacter::DetectSideCollisions(const std::vector<std::shared_ptr<Util::GameObject>> &walls, CollisionFlags &flags) const {
-    // 清空標旗
-    flags.left = flags.right = flags.up = flags.down = false;
+MainCharacter:: CollisionFlags MainCharacter::MoveX(const std::vector<std::shared_ptr<Util::GameObject>>& walls, float dx) {
+    CollisionFlags flags{};  // all false
 
-    // 取得主角碰撞矩形，這裡假設主角尺寸是 {30,27}
-    glm::vec2 posA = GetCoordinate() + glm::vec2{0, 10};
-    glm::vec2 sizeA = {30, 27};
-    const float eps = 1.0f; // 偵測厚度
+    glm::vec2 pos = GetCoordinate();
+    glm::vec2 testPos = pos + glm::vec2{dx, 0};
 
-    // 定義各邊的區域
-    glm::vec2 leftRectPos   = { posA.x - eps, posA.y };
-    glm::vec2 leftRectSize  = { eps, sizeA.y };
+    // 看看未來的位置，跟哪個物件撞
+    auto hit = FindCollision(walls, testPos);
+    if (hit) {
+        // 左右標旗
+        if (dx > 0) flags.right = true;
+        else         flags.left  = true;
 
-    glm::vec2 rightRectPos  = { posA.x + sizeA.x, posA.y };
-    glm::vec2 rightRectSize = { eps, sizeA.y };
+        // 停下來
+        velocity_x = 0.0f;
 
-    glm::vec2 downRectPos     = { posA.x, posA.y - eps };
-    glm::vec2 downRectSize    = { sizeA.x, eps };
+        // 如果是木箱就摧毀
+        if (auto box = std::dynamic_pointer_cast<WoodBox>(hit);
+            box && box->IsIntact()){
+            box->OnCollide();
+        }
+    } else {
+        // 沒撞：才更新位置
+        pos.x += dx;
+        SetCoordinate(pos);
+    }
+    return flags;
+}
 
-    glm::vec2 upRectPos   = { posA.x, posA.y + sizeA.y };
-    glm::vec2 upRectSize  = { sizeA.x, eps };
+MainCharacter:: CollisionFlags MainCharacter::MoveY(const std::vector<std::shared_ptr<Util::GameObject>>& walls, float dy) {
+    CollisionFlags flags{};
 
-    // 檢查每個牆壁
-    for (const auto &wallObj : walls) {
-        auto wall = std::dynamic_pointer_cast<Objects>(wallObj);
-        if (wall) {
-            glm::vec2 posB = wall->GetCoordinate();
-            glm::vec2 sizeB = wall->m_Transform.scale;  // 牆壁尺寸
-            if (RectOverlap(leftRectPos, leftRectSize, posB, sizeB))
-                flags.left = true;
+    glm::vec2 pos = GetCoordinate();
+    glm::vec2 testPos = pos + glm::vec2{0.0f, dy};
 
-            if (RectOverlap(rightRectPos, rightRectSize, posB, sizeB))
-                flags.right = true;
+    auto hit = FindCollision(walls, testPos);
+    if (hit) {
+        if (dy > 0) flags.up   = true;
+        else        flags.down = true;
 
-            if (RectOverlap(upRectPos, upRectSize, posB, sizeB))
-                flags.up = true;
+        if (flags.up || flags.down)
+            velocity_y = 0.0f;
 
-            if (RectOverlap(downRectPos, downRectSize, posB, sizeB))
-                flags.down = true;
+        // 著地時特別處理狀態
+        if (flags.down) {
+            IsGround   = true;
+            Dashed     = false;
+            isDashing  = false;
+            IsJumping  = false;
+        }
+
+        // 木箱摧毀
+        if (auto box = std::dynamic_pointer_cast<WoodBox>(hit);
+            box && box->IsIntact()){
+            box->OnCollide();
+        }
+    } else {
+        // 空中時取消地面狀態
+        if (!flags.down) IsGround = false;
+        pos.y += dy;
+        SetCoordinate(pos);
+    }
+    return flags;
+}
+
+std::shared_ptr<Util::GameObject> MainCharacter::FindCollision(
+    const std::vector<std::shared_ptr<Util::GameObject>>& walls,
+    const glm::vec2& testPos
+){
+    // 暫存座標
+    auto orig = GetCoordinate();
+    SetCoordinate(testPos);
+
+    // 找第一個重疊的
+    for (auto& obj : walls) {
+        // 只處理繼承自 Objects（或你定義的 InvisibleWall）的物件
+        auto wall = std::dynamic_pointer_cast<Objects>(obj);
+        if (!wall)
+            continue;    // 不是「牆」就跳過
+
+        if (IfCollidesObject(wall)) {
+            SetCoordinate(orig);
+            return obj;
         }
     }
+    // 還原
+    SetCoordinate(orig);
+    return nullptr;
 }
 
 bool MainCharacter::IfCollidesObject(const std::shared_ptr<Objects>& other) const {
@@ -304,7 +284,17 @@ bool MainCharacter::IfCollidesObject(const std::shared_ptr<Objects>& other) cons
     glm::vec2 sizeA = {30, 27};
 
     glm::vec2 posB = other->GetCoordinate(); // 另一個物件的座標
-    glm::vec2 sizeB = other->m_Transform.scale;
+    glm::vec2 sizeB = other->m_Transform.scale * 48.0f;
+
+    return RectOverlap(posA, sizeA, posB, sizeB);
+}
+
+bool MainCharacter::IfCollidesObject(const std::shared_ptr<AnimatedObjects>& other) const {
+    glm::vec2 posA = GetCoordinate() + glm::vec2{0, 10};
+    glm::vec2 sizeA = {30, 27};
+
+    glm::vec2 posB = other->GetCoordinate(); // 另一個物件的座標
+    glm::vec2 sizeB = other->m_Transform.scale * 48.0f;
 
     return RectOverlap(posA, sizeA, posB, sizeB);
 }
@@ -340,3 +330,13 @@ void MainCharacter::KillInstant() {
     // 如果你有播放死亡動畫或音效，可以在這裡呼叫
     // PlayDeathAnimation();
 }
+
+void MainCharacter :: BounceJump() {
+    velocity_y = bounceforce;
+    ResetDash();
+}
+
+void MainCharacter :: ResetDash() {
+    Dashed = false;
+}
+
