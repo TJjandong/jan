@@ -26,18 +26,7 @@ public:
         END,
     };
 
-    State GetCurrentState() const { return m_CurrentState; }
-
-    void Start();
-
-    void Update();
-
-    void End(); // NOLINT(readability-convert-member-functions-to-static)
-
-private:
-    void ValidTask();
-
-    enum class Phase {
+    enum Phase {
         Phase00,
         Phase01,
         Phase02,
@@ -60,6 +49,17 @@ private:
         Phase19,
         Phase20
     };
+
+    State GetCurrentState() const { return m_CurrentState; }
+
+    void Start();
+
+    void Update();
+
+    void End(); // NOLINT(readability-convert-member-functions-to-static)
+
+private:
+    void ValidTask();
 
     State m_CurrentState = State::START;
 

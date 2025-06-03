@@ -18,4 +18,27 @@ void Balloon::Update(float dt) {
             m_intact = true;
         }
     }
+
+    m_cycleTimer -= dt;
+    if (m_cycleTimer <= 0.0f) {
+        m_cycleTimer += 3.0f;
+    }
+
+    m_moveTimer += dt;
+    if (m_moveTimer >= 0.5f) {
+        // 每 0.5 秒移動一步
+        m_moveTimer -= 0.5f;
+
+        // 判斷目前是在 3 秒週期的哪一段：
+        float elapsed = 3.0f - m_cycleTimer;
+        float moveAmount = 6.0f;
+        // 「一小格」你可自行調整數值 10.0f
+        glm::vec2 pos = GetCoordinate();
+        if (elapsed < 1.5f) {
+            pos.y -= moveAmount;
+        } else {
+            pos.y += moveAmount;
+        }
+        SetCoordinate(pos);
+    }
 }

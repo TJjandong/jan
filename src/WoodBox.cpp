@@ -12,13 +12,14 @@ void WoodBox::Update(float dt) {
         m_timer -= dt;
         if (m_timer <= 0.0f) {
             // 倒數結束，還原為原本貼圖
+            SetVisible(true);
             SetImage(m_Image1);
             SetScale(1.0f, 1.0f);
             m_intact = true;
         }else if (m_timer <= 2.0f) {
             // 立刻隱藏木箱：移除碰撞效果＋改成透明
             SetScale(-1.0f, -1.0f);
-            SetImage("");       // 清掉圖片
+            SetVisible(false);       // 清掉圖片
         }else if (m_timer <= 2.33f) {
             SetImage(m_Image3);
         }else if (m_timer <= 2.67f) {

@@ -26,6 +26,9 @@ namespace AppUtil {
             case 1:
                 app.m_madline->SetSpawnPoint({-300.0f, -250.0f});
                 break;
+            case 10:
+                app.m_madline->SetSpawnPoint({-300.0f, -250.0f});
+            break;
             default:
                 app.m_madline->SetSpawnPoint({-300.0f, -150.0f});
                 break;

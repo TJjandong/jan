@@ -103,6 +103,21 @@ void PhaseResourceManager::SetBoundary(const int phase) {
             col++;
         }
         row++;
+
+        for (auto& objbounce : m_Bounces) {
+            auto bounce = std::dynamic_pointer_cast<Bounce>(objbounce);
+            for (auto& objwood : m_WoodBoxes) {
+                auto wood = std::dynamic_pointer_cast<WoodBox>(objwood);
+                // 比對 x/y 座標，看彈簧是不是在木箱正上方的一格
+                auto bp = bounce->GetCoordinate();
+                auto wp = wood->GetCoordinate();
+                // 例如：如果彈簧 Y = 木箱 Y + 48（就是上方一格），X 完全相同
+                if (glm::abs(bp.x - wp.x) < 30.0f && glm::abs(bp.y - (wp.y + 48.0f)) < 30.0f) {
+                    bounce->AttachToWood(wood);
+                    break;
+                }
+            }
+        }
     }
     file.close();
     LOG_DEBUG("牆壁資料讀取完成，共建立 {} 個隱形牆", m_Walls.size());

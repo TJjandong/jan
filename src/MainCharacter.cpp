@@ -242,8 +242,8 @@ MainCharacter:: CollisionFlags MainCharacter::MoveY(const std::vector<std::share
         }
         else        flags.down = true;
 
-        if (flags.down)
-            velocity_y = 0.0f;
+        velocity_y = 0.0f;
+
 
         // 著地時特別處理狀態
         if (flags.down) {

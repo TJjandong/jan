@@ -13,6 +13,8 @@ public:
                                      ,RESOURCE_DIR "/Image/AnimatedPicture/Balloon/balloon2.png"
                                      ,RESOURCE_DIR "/Image/AnimatedPicture/Balloon/balloon3.png"})
     , m_timer(0.0f)
+    , m_cycleTimer(3.0f)
+    , m_moveTimer(0.0f)
     , m_intact(true)
     {
         SetCoordinate(coord);
@@ -28,6 +30,8 @@ public:
     private:
     float m_timer;        // 倒數計時
     bool m_intact;
+    float m_cycleTimer;   // 3s 週期倒數，從 3→0，然後再重置為 3
+    float m_moveTimer;    // 每 0.5s 觸發一次位移
 };
 
 #endif //BALLOON_HPP

@@ -3,8 +3,7 @@
 
 #include "Objects.hpp"
 #include "Main_Character.hpp"
-
-static constexpr float BounceTransTime = 0.5f;   // 秒
+#include "WoodBox.hpp"
 
 class Bounce : public Objects {
 public:
@@ -24,11 +23,17 @@ public:
 
     void Update(float dt);
 
+    void AttachToWood(const std::shared_ptr<WoodBox>& wood) {
+        m_parentWood = wood;
+    }
+
 private:
+    std::weak_ptr<WoodBox> m_parentWood;        //不會和 PhaseResourceManager 的 shared_ptr<WoodBox> 產生循環引用
     std::string m_origImage;    // 原本的空閒貼圖
     std::string m_activeImage;  // 被踩的貼圖
     float       m_timer;        // 倒數計時
     glm::vec2   m_Pos;
+    const float BounceTransTime = 0.5f;   // 秒
 };
 
 #endif

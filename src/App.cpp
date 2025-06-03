@@ -6,15 +6,13 @@ void App::Start() {
 
     // 設置角色圖片
     m_madline = std::make_shared<MainCharacter>(RESOURCE_DIR "/Image/Character/standR.png");
-    m_madline->SetSpawnPoint({-300.0f, -150.0f});  // 確保角色在可見範圍
     m_madline->SetZIndex(90);  // 設置角色比雲朵低
-    m_Root.AddChild(m_madline);  // 添加角色到根物件
-
 
     // 設置背景
+    m_Phase = Phase::Phase10;
     m_PRM = std::make_shared<PhaseResourceManager>();  // 加載背景等
-    m_PRM->SetBoundary(6);
-    m_Root.AddChildren(m_PRM->GetChildren());  // 添加背景
+    m_PRM->NextPhase(m_Phase);
+    AppUtil::LoadPhase(*this);
 
     m_CurrentState = State::UPDATE;
 }
@@ -30,11 +28,11 @@ void App::Update() {
     glm::vec2 currentPos = m_madline->GetPosition();
 
 
-    //std::string coordinatesText = "X: " + std::to_string(currentPos.x) + " Y: " + std::to_string(currentPos.y);
+    std::string coordinatesText = "X: " + std::to_string(currentPos.x) + " Y: " + std::to_string(currentPos.y);
 
     // Use the renderer to draw the text on the screen
     // Assuming m_Root.AddText() is a function that adds text to be rendered on the screen
-    //std::cout << coordinatesText << std::endl;
+    std::cout << coordinatesText << std::endl;
 
     for (auto& child : m_PRM->GetChildren()) {
         if (auto trap = std::dynamic_pointer_cast<Trap>(child)) {
