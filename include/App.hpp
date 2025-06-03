@@ -68,12 +68,11 @@ private:
 
     std::shared_ptr<MainCharacter> m_madline;
 
-    //道具物件等交給PhaseResource生成
+    //道具物件交給PhaseResource生成
 
     std::shared_ptr<AnimatedObjects> m_strawberry;
     std::shared_ptr<AnimatedObjects> m_FlyingStrawberry;
     std::shared_ptr<AnimatedObjects> m_key;
-    std::shared_ptr<AnimatedObjects> m_Balloon;
 
     std::shared_ptr<PhaseResourceManager> m_PRM;
 

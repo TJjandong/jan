@@ -12,7 +12,7 @@ public:
     {
         SetCoordinate(coordinate);  // 設定牆壁位置
         SetScale(1.0f, 1.0f);
-        SetZIndex(50);  // 設定較低的 Z-Index
+        SetZIndex(10);  // 設定較低的 Z-Index
     }
 
 

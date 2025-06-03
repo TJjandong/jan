@@ -1,7 +1,5 @@
 #include "PhaseResourceManager.hpp"
 
-#include "Balloon.hpp"
-
 PhaseResourceManager::PhaseResourceManager() {
     //m_TaskText = std::make_shared<TaskText>();
     m_Background = std::make_shared<BackgroundImage>();
@@ -27,6 +25,7 @@ void PhaseResourceManager::SetBoundary(const int phase) {
     m_Bounces.clear();
     m_WoodBoxes.clear();
     m_Balloons.clear();
+    m_Clouds.clear();
 
     std::string line;
     int row = 0;
@@ -42,12 +41,14 @@ void PhaseResourceManager::SetBoundary(const int phase) {
                 glm::vec2 position = origin + glm::vec2(col * cellSize, -row * cellSize);
                 auto wall = std::make_shared<InvisibleWall>(position);
                 m_Walls.push_back(wall);
-            }else if (cell == 2) {      //Trap下
+            }else if (cell == 2) {
+                //Trap下
                 glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
                 auto trap = std::make_shared<Trap>(pos, Trap::Orientation::Down );
                 trap -> SetScale(1.0f, 0.33f);
                 m_Traps.push_back(trap);
-            }else if (cell == 3) {      //Trap上
+            }else if (cell == 3) {
+                //Trap上
                 glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
                 auto trap = std::make_shared<Trap>(pos, Trap::Orientation::Up );
                 trap -> SetCoordinate(pos + glm::vec2(0.0f, 32.0f));
@@ -65,16 +66,39 @@ void PhaseResourceManager::SetBoundary(const int phase) {
                 auto box = std::make_shared<WoodBox>(BoxPos);
                 m_WoodBoxes.push_back(box);
             }else if (cell == 6) {
-                // 每一個 5 代表一個「木箱」
+                // 每一個 6 代表一個「氣球」
                 glm::vec2 BalloonPos = origin + glm::vec2(col * cellSize, -row * cellSize);
                 auto balloon = std::make_shared<Balloon>(BalloonPos);
                 m_Balloons.push_back(balloon);
+            }else if (cell == 7) {
+                //Cloud左
+                glm::vec2 CloudPos = origin + glm::vec2(col * cellSize, -row * cellSize);
+                auto cloud = std::make_shared<Cloud>(CloudPos, Cloud::Orientation::Left);
+                m_Clouds.push_back(cloud);
+            }else if (cell == 8) {
+                //Cloud右
+                glm::vec2 CloudPos = origin + glm::vec2(col * cellSize, -row * cellSize);
+                auto cloud = std::make_shared<Cloud>(CloudPos, Cloud::Orientation::Right);
+                m_Clouds.push_back(cloud);
             }else if (cell == 9) {
                 // 每一個 9 代表一個「下一關目標」
                 glm::vec2 goalPos = origin + glm::vec2(col * cellSize, -row * cellSize);
                 auto goal = std::make_shared<Goal>(goalPos);
                 //goal->SetCoordinate(goalPos);
                 m_Goals.push_back(goal);
+            }else if (cell == 10) {
+                //Trap左
+                glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
+                auto trap = std::make_shared<Trap>(pos, Trap::Orientation::Left );
+                trap -> SetScale(0.33f, 1.0f);
+                m_Traps.push_back(trap);
+            }else if (cell == 11) {
+                //Trap右
+                glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
+                auto trap = std::make_shared<Trap>(pos, Trap::Orientation::Right );
+                trap -> SetCoordinate(pos + glm::vec2(32.0f, 0.0f));
+                trap -> SetScale(0.33f, 1.0f);
+                m_Traps.push_back(trap);
             }
             col++;
         }

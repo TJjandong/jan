@@ -9,6 +9,7 @@ set(SRC_FILES
         WoodBox.cpp
         Bounce.cpp
         Balloon.cpp
+        Cloud.cpp
 )
 
 set(INCLUDE_FILES

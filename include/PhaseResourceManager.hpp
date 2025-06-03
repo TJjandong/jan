@@ -1,11 +1,14 @@
 #ifndef PHASE_MANAGER_HPP
 #define PHASE_MANAGER_HPP
+
+#include "BackgroundImage.hpp"
 #include "Trap.hpp"
 #include "GoalFlag.hpp"
 #include "Bounce.hpp"
-#include "BackgroundImage.hpp"
 #include "InvisibleWall.hpp"
 #include "WoodBox.hpp"
+#include "Balloon.hpp"
+#include "Cloud.hpp"
 
 #include "Util/Logger.hpp"
 #include "Util/GameObject.hpp"
@@ -48,6 +51,11 @@ public:
             if (balloons)
                 children.push_back(balloons);
         };
+
+        for (auto& clouds : m_Clouds) {
+            if (clouds)
+                children.push_back(clouds);
+        };
         return children;;
     }
 
@@ -58,8 +66,12 @@ public:
     // PhaseResourceManager.hpp
     std::vector<std::shared_ptr<Util::GameObject>> GetWall() const {
         std::vector<std::shared_ptr<Util::GameObject>> walls = m_Walls;
+
         for (auto& box : m_WoodBoxes) {
             walls.push_back(box);
+        }
+        for (auto& cloud : m_Clouds) {
+            walls.push_back(cloud);
         }
         return walls;
     }
@@ -73,6 +85,7 @@ private:
     std::vector<std::shared_ptr<Util::GameObject>> m_Bounces;
     std::vector<std::shared_ptr<Util::GameObject>> m_WoodBoxes;
     std::vector<std::shared_ptr<Util::GameObject>> m_Balloons;
+    std::vector<std::shared_ptr<Util::GameObject>> m_Clouds;
 };
 
 

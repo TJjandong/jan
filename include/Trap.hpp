@@ -13,7 +13,7 @@ public:
     {
         SetCoordinate(coord);
         SetScale(1.0f, 1.0f);
-        SetZIndex(40);
+        SetZIndex(10);
     }
 
     void OnCollide(MainCharacter& player);

@@ -6,6 +6,7 @@
 #include "Util/Time.hpp"
 #include "InvisibleWall.hpp"
 #include "WoodBox.hpp"
+#include "Cloud.hpp"
 #include <string>
 #include <iostream>
 #include <cmath>
@@ -67,8 +68,8 @@ private:
     bool nearLeftWall = false;
     bool nearRightWall = false;
     float dashTimer = 0.0f;           // 單位：毫秒
-    const float dashDuration = 200.0f; // 衝刺持續 200 毫秒，可依需求調整
-    float bounceforce = 23.0f;
+    const float dashDuration = 250.0f; // 衝刺持續 200 毫秒，可依需求調整
+    float bounceforce = 23.3f;
 
     float m_CoyoteTime = 0.0f; // 剩餘郊狼時間
     const float COYOTE_TIME_TOLERANCE = 1.5f; // 最大容許時間（秒）

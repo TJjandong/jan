@@ -19,7 +19,7 @@ public:
     {
         SetCoordinate(coord);
         SetScale( 1.0f, 1.0f);
-        SetZIndex(70);
+        SetZIndex(60);
     }
 
     void OnCollide();

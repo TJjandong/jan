@@ -13,9 +13,9 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
     const float max_speed = 4.3f;
     const float acceleration = 6.0f;
     const float friction = 4.0f;
-    const float Jumpforce = 18.3f;         // 跳躍時的初速度
+    const float Jumpforce = 17.5f;         // 跳躍時的初速度
     const float Dashforce = 30.0f;           // 衝刺時的初速度
-    float Gravity = 0.9f;            // 重力加速度，每幀施加
+    float Gravity = 0.6f;            // 重力加速度，每幀施加
     const float max_fall_speed = -max_speed * 2.1f;  // 限制垂直下落速度
     nearLeftWall  = false;
     nearRightWall = false;
@@ -101,15 +101,38 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
                 velocity_x = std::min(0.0f, velocity_x + friction);
             }
         }
+
+        // 當角色不在地面時施加重力
+        if (!IsGround) {
+            if (velocity_y > 2.5f)
+                velocity_y -= Gravity;
+            if (velocity_y <= 2.5f && velocity_y >= -2.5f)
+                velocity_y -= Gravity - 0.25f;
+            else
+                velocity_y -= Gravity;
+
+            if (velocity_y < max_fall_speed)
+                velocity_y = max_fall_speed;
+
+            if (Isgrabbing) {
+                if (velocity_y < 0) {
+                    if (velocity_y > max_fall_speed*0.4f)
+                        velocity_y -= Gravity * 0.088f;
+                    else
+                        velocity_y = max_fall_speed*0.4f;
+                }
+            }
+        }
     } else {
         Gravity = 0.0f;
         if (velocity_x > max_speed) velocity_x -= friction * 0.6f;
         if (velocity_x < -max_speed) velocity_x += friction * 0.6f;
-        if (velocity_y > max_speed) velocity_y -= friction * 0.8f;
-        if (velocity_y < max_fall_speed) velocity_y += friction * 0.8f;
+        if (velocity_y > max_speed) velocity_y -= friction * 0.7f;
+        if (velocity_y < max_fall_speed) velocity_y += friction * 0.7f;
     }
 
-    // 2) 碰撞與移動拆成兩步：水平、再垂直
+
+    // 碰撞與移動拆成兩步：水平、再垂直
     auto hFlags = MoveX(walls, velocity_x);
     // 更新抓牆狀態
     nearLeftWall = hFlags.left;
@@ -119,6 +142,7 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
 
     // 更新新的垂直位置
     auto vFlags = MoveY(walls, velocity_y);
+
 
     // --- 郊狼時間（Coyote Time）更新 ---
     if (IsGround) {
@@ -162,31 +186,6 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
         m_CoyoteTime  = 0.0f;
     }
 
-
-    // 當角色不在地面時施加重力
-    if (!IsGround) {
-        if (velocity_y > 2.5f)
-            velocity_y -= Gravity - 0.45f;
-        if (velocity_y <= 2.5f && velocity_y > 0)
-            velocity_y -= Gravity - 0.7f;
-        else
-            velocity_y -= Gravity;
-
-        if (velocity_y < max_fall_speed)
-            velocity_y = max_fall_speed;
-
-        if (Isgrabbing) {
-            if (velocity_y < 0) {
-                if (velocity_y > max_fall_speed*0.4f)
-                    velocity_y -= Gravity * 0.033f;
-                else
-                    velocity_y = max_fall_speed*0.4f;
-            }
-        }
-    }
-
-    // 更新角色最終位置
-    //SetCoordinate(newPos);
 }
 
 MainCharacter:: CollisionFlags MainCharacter::MoveX(const std::vector<std::shared_ptr<Util::GameObject>>& walls, float dx) {
@@ -198,6 +197,11 @@ MainCharacter:: CollisionFlags MainCharacter::MoveX(const std::vector<std::share
     // 看看未來的位置，跟哪個物件撞
     auto hit = FindCollision(walls, testPos);
     if (hit) {
+        if (auto cloud = std::dynamic_pointer_cast<Cloud>(hit)) {
+            pos.x += dx;
+            SetCoordinate(pos);
+            return flags;
+        }
         // 左右標旗
         if (dx > 0) flags.right = true;
         else         flags.left  = true;
@@ -226,10 +230,19 @@ MainCharacter:: CollisionFlags MainCharacter::MoveY(const std::vector<std::share
 
     auto hit = FindCollision(walls, testPos);
     if (hit) {
-        if (dy > 0) flags.up   = true;
+        if (dy > 0 ) {
+            if (auto cloud = std::dynamic_pointer_cast<Cloud>(hit)) {
+                // 空中時取消地面狀態
+                if (!flags.down) IsGround = false;
+                pos.y += dy;
+                SetCoordinate(pos);
+                return flags;
+            }
+            flags.up   = true;
+        }
         else        flags.down = true;
 
-        if (flags.up || flags.down)
+        if (flags.down)
             velocity_y = 0.0f;
 
         // 著地時特別處理狀態
@@ -238,6 +251,13 @@ MainCharacter:: CollisionFlags MainCharacter::MoveY(const std::vector<std::share
             Dashed     = false;
             isDashing  = false;
             IsJumping  = false;
+        }
+
+        if (auto cloud = std::dynamic_pointer_cast<Cloud>(hit)) {
+            if (cloud->IsRight())
+                SetCoordinate(pos + MoveRight);
+            else
+                SetCoordinate(pos + MoveLeft);
         }
 
         // 木箱摧毀
@@ -291,7 +311,7 @@ bool MainCharacter::IfCollidesObject(const std::shared_ptr<Objects>& other) cons
 
 bool MainCharacter::IfCollidesObject(const std::shared_ptr<AnimatedObjects>& other) const {
     glm::vec2 posA = GetCoordinate() + glm::vec2{0, 10};
-    glm::vec2 sizeA = {30, 27};
+    glm::vec2 sizeA = {30.0f, 27.0f};
 
     glm::vec2 posB = other->GetCoordinate(); // 另一個物件的座標
     glm::vec2 sizeB = other->m_Transform.scale * 48.0f;

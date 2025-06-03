@@ -57,6 +57,7 @@ add_executable(${PROJECT_NAME}
         src/WoodBox.cpp
         src/Balloon.cpp
         include/Cloud.hpp
+        src/Cloud.cpp
 )
 
 if(MSVC)

@@ -11,7 +11,7 @@ public:
     {
         SetCoordinate(coord);
         SetScale(1.0f, 1.0f);
-        SetZIndex(90);
+        SetZIndex(10);
     }
 };
 
