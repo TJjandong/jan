@@ -23,14 +23,35 @@ namespace AppUtil {
         app.m_Root.AddChildren(app.m_PRM->GetChildren());  // 背景、牆、陷阱、目標 :contentReference[oaicite:3]{index=3}
         // 3) 重設角色重生點（可選）：每關可以有不同的 spawn point
         switch (phaseIndex) {
-            case 1:
-                app.m_madline->SetSpawnPoint({-300.0f, -250.0f});
+            case app.Phase01:
+                app.m_madline->SetSpawnPoint({-300.0f, -300.0f});
                 break;
-            case 10:
+            case app.Phase02:
                 app.m_madline->SetSpawnPoint({-300.0f, -250.0f});
             break;
-            default:
+            case app.Phase04:
                 app.m_madline->SetSpawnPoint({-300.0f, -150.0f});
+            break;
+            case app.Phase05:
+                app.m_madline->SetSpawnPoint({-300.0f, -150.0f});
+            break;
+            case app.Phase06:
+                app.m_madline->SetSpawnPoint({-250.0f, -300.0f});
+            break;
+            case app.Phase07:
+                app.m_madline->SetSpawnPoint({-300.0f, -300.0f});
+            break;
+            case app.Phase08:
+                app.m_madline->SetSpawnPoint({-250.0f, -200.0f});
+            break;
+            case app.Phase09:
+                app.m_madline->SetSpawnPoint({-300.0f, -250.0f});
+            break;
+            case app.Phase10:
+                app.m_madline->SetSpawnPoint({-300.0f, -300.0f});
+            break;
+            default:
+                app.m_madline->SetSpawnPoint({-300.0f, -200.0f});
                 break;
         }
     }

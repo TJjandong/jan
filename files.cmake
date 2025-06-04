@@ -5,7 +5,6 @@ set(SRC_FILES
         MainCharacter.cpp
         Objects.cpp
         PhaseResourceManager.cpp
-        Trap.cpp
         WoodBox.cpp
         Bounce.cpp
         Balloon.cpp

@@ -13,7 +13,7 @@ void App::Start() {
     m_madline->SetZIndex(90);  // 設置角色比雲朵低
 
     // 設置背景
-    m_Phase = Phase::Phase00;
+    m_Phase = Phase::Phase03;
     m_PRM = std::make_shared<PhaseResourceManager>();  // 加載背景等
     m_PRM->NextPhase(m_Phase);
     AppUtil::LoadPhase(*this);
@@ -28,9 +28,11 @@ void App::Update() {
 
     if (PressU) {
         flag = false;
+        AppUtil::removeObjects(*this);
         AppUtil::LoadPhase(*this);
     }else if (PressI) {
         flag = true;
+        AppUtil::removeObjects(*this);
         AppUtil::LoadPhase(*this);
     }
 
@@ -38,7 +40,7 @@ void App::Update() {
     m_madline->Draw();
 
     // Get the current position of the main character
-    glm::vec2 currentPos = m_madline->GetPosition();
+    glm::vec2 currentPos = m_madline->GetCoordinate();
 
 
     std::string coordinatesText = "X: " + std::to_string(currentPos.x) + " Y: " + std::to_string(currentPos.y);
@@ -50,7 +52,9 @@ void App::Update() {
     for (auto& child : m_PRM->GetChildren()) {
         if (auto trap = std::dynamic_pointer_cast<Trap>(child)) {
             if (m_madline->IfCollidesObject(trap)) {
-                trap->OnCollide(*m_madline);
+                std::cout << "踩到陷阱了" << std::endl;
+                AppUtil::removeObjects(*this);
+                AppUtil::LoadPhase(*this);
             }
         }
         if (auto goal = std::dynamic_pointer_cast<Goal>(child)) {

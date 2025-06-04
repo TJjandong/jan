@@ -15,8 +15,6 @@ public:
         SetScale(1.0f, 1.0f);
         SetZIndex(10);
     }
-
-    void OnCollide(MainCharacter& player);
 };
 
 #endif //TRAP_HPP

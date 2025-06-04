@@ -51,6 +51,7 @@ void PhaseResourceManager::SetBoundary(const int phase, bool flag) {
                 }else {
                     glm::vec2 position = origin + glm::vec2(col * cellSize, -row * cellSize);
                     auto wall = std::make_shared<InvisibleWall>(position);
+                    wall -> SetScale(1.0f, 0.33f);
                     m_Walls.push_back(wall);
                 }
             }else if (cell == 3) {

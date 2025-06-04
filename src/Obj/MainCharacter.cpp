@@ -325,32 +325,6 @@ bool MainCharacter::RectOverlap(const glm::vec2 &a, const glm::vec2 &sizeA,
             a.y < b.y + sizeB.y && a.y + sizeA.y > b.y);
 }
 
-void MainCharacter::KillInstant() {
-    // 把角色搬回起點
-    ReSpawn();
-
-    // 歸零速度
-    velocity_x = 0.0f;
-    velocity_y = 0.0f;
-
-    // 重置跳躍、衝刺等狀態
-    IsGround       = false;
-    IsJumping      = false;
-    Dashed         = false;
-    isDashing      = false;
-    Isgrabbing     = false;
-    nearLeftWall   = false;
-    nearRightWall  = false;
-
-    // 重置緩衝、郊狼時間
-    m_JumpBuffered = false;
-    m_CoyoteTime   = 0.0f;
-    m_WallJumpLockTimer = 0.0f;
-
-    // 如果你有播放死亡動畫或音效，可以在這裡呼叫
-    // PlayDeathAnimation();
-}
-
 void MainCharacter :: BounceJump() {
     velocity_y = bounceforce;
     ResetDash();
