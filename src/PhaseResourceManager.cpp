@@ -9,7 +9,7 @@ void PhaseResourceManager::NextPhase(const int phase) {
     m_Background->NextPhase(phase);
 }
 
-void PhaseResourceManager::SetBoundary(const int phase) {
+void PhaseResourceManager::SetBoundary(const int phase, bool flag) {
     // 指定牆壁資料的 txt 檔路徑（請根據實際路徑調整）
     std::string wallFilePath = RESOURCE_DIR"/WallMatrix/" + std::to_string(phase) + ".txt";
     std::ifstream file(wallFilePath);
@@ -42,11 +42,17 @@ void PhaseResourceManager::SetBoundary(const int phase) {
                 auto wall = std::make_shared<InvisibleWall>(position);
                 m_Walls.push_back(wall);
             }else if (cell == 2) {
-                //Trap下
-                glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
-                auto trap = std::make_shared<Trap>(pos, Trap::Orientation::Down );
-                trap -> SetScale(1.0f, 0.33f);
-                m_Traps.push_back(trap);
+                if (flag == true) {
+                    //Trap下
+                    glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
+                    auto trap = std::make_shared<Trap>(pos, Trap::Orientation::Down );
+                    trap -> SetScale(1.0f, 0.33f);
+                    m_Traps.push_back(trap);
+                }else {
+                    glm::vec2 position = origin + glm::vec2(col * cellSize, -row * cellSize);
+                    auto wall = std::make_shared<InvisibleWall>(position);
+                    m_Walls.push_back(wall);
+                }
             }else if (cell == 3) {
                 //Trap上
                 glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
@@ -87,18 +93,33 @@ void PhaseResourceManager::SetBoundary(const int phase) {
                 //goal->SetCoordinate(goalPos);
                 m_Goals.push_back(goal);
             }else if (cell == 10) {
-                //Trap左
-                glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
-                auto trap = std::make_shared<Trap>(pos, Trap::Orientation::Left );
-                trap -> SetScale(0.33f, 1.0f);
-                m_Traps.push_back(trap);
+                if (flag == true) {
+                    //Trap左
+                    glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
+                    auto trap = std::make_shared<Trap>(pos, Trap::Orientation::Left );
+                    trap -> SetScale(0.33f, 1.0f);
+                    m_Traps.push_back(trap);
+                }else {
+                    glm::vec2 position = origin + glm::vec2(col * cellSize, -row * cellSize);
+                    auto wall = std::make_shared<InvisibleWall>(position);
+                    wall -> SetScale(0.33f, 1.0f);
+                    m_Walls.push_back(wall);
+                }
             }else if (cell == 11) {
-                //Trap右
-                glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
-                auto trap = std::make_shared<Trap>(pos, Trap::Orientation::Right );
-                trap -> SetCoordinate(pos + glm::vec2(32.0f, 0.0f));
-                trap -> SetScale(0.33f, 1.0f);
-                m_Traps.push_back(trap);
+                if (flag == true) {
+                    //Trap右
+                    glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
+                    auto trap = std::make_shared<Trap>(pos, Trap::Orientation::Right );
+                    trap -> SetCoordinate(pos + glm::vec2(32.0f, 0.0f));
+                    trap -> SetScale(0.33f, 1.0f);
+                    m_Traps.push_back(trap);
+                }else {
+                    glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
+                    auto wall = std::make_shared<InvisibleWall>(pos);
+                    wall -> SetCoordinate(pos + glm::vec2(32.0f, 0.0f));
+                    wall -> SetScale(0.33f, 1.0f);
+                    m_Walls.push_back(wall);
+                }
             }
             col++;
         }

@@ -18,7 +18,7 @@ namespace AppUtil {
         int phaseIndex = static_cast<int>(app.m_Phase);
 
         // 2) 讓 ResourceManager 讀取對應的地圖／陷阱／目標
-        app.m_PRM->SetBoundary(phaseIndex);  // 讀取 0.txt, 1.txt ... :contentReference[oaicite:1]{index=1}:contentReference[oaicite:2]{index=2}
+        app.m_PRM->SetBoundary(phaseIndex, app.flag);  // 讀取 0.txt, 1.txt ... :contentReference[oaicite:1]{index=1}:contentReference[oaicite:2]{index=2}
         app.m_Root.AddChild(app.m_madline);
         app.m_Root.AddChildren(app.m_PRM->GetChildren());  // 背景、牆、陷阱、目標 :contentReference[oaicite:3]{index=3}
         // 3) 重設角色重生點（可選）：每關可以有不同的 spawn point

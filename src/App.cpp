@@ -1,5 +1,9 @@
 #include "App.hpp"
 
+#define PressX Util::Input::IsKeyPressed(Util::Keycode::X)
+#define PressU Util::Input::IsKeyPressed(Util::Keycode::U)
+#define PressI Util::Input::IsKeyPressed(Util::Keycode::I)
+
 void App::Start() {
     LOG_TRACE("Start");
 
@@ -9,7 +13,7 @@ void App::Start() {
     m_madline->SetZIndex(90);  // 設置角色比雲朵低
 
     // 設置背景
-    m_Phase = Phase::Phase10;
+    m_Phase = Phase::Phase00;
     m_PRM = std::make_shared<PhaseResourceManager>();  // 加載背景等
     m_PRM->NextPhase(m_Phase);
     AppUtil::LoadPhase(*this);
@@ -21,6 +25,15 @@ void App::Update() {
 
     //TODO: do your things here and delete this line <3
     float dt_s = Util::Time::GetDeltaTimeMs() * 0.001f;  // 毫秒轉秒
+
+    if (PressU) {
+        flag = false;
+        AppUtil::LoadPhase(*this);
+    }else if (PressI) {
+        flag = true;
+        AppUtil::LoadPhase(*this);
+    }
+
     m_Root.Update();
     m_madline->Draw();
 

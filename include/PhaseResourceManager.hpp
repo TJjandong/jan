@@ -2,13 +2,13 @@
 #define PHASE_MANAGER_HPP
 
 #include "BackgroundImage.hpp"
-#include "Trap.hpp"
-#include "GoalFlag.hpp"
-#include "Bounce.hpp"
-#include "InvisibleWall.hpp"
-#include "WoodBox.hpp"
-#include "Balloon.hpp"
-#include "Cloud.hpp"
+#include "Obj/Trap.hpp"
+#include "Obj/GoalFlag.hpp"
+#include "Obj/Bounce.hpp"
+#include "Obj/InvisibleWall.hpp"
+#include "Obj/WoodBox.hpp"
+#include "Obj/Balloon.hpp"
+#include "Obj/Cloud.hpp"
 
 #include "Util/Logger.hpp"
 #include "Util/GameObject.hpp"
@@ -61,7 +61,7 @@ public:
 
     void NextPhase(const int phase);
 
-    void SetBoundary(const int phase);  //wall & trap
+    void SetBoundary(const int phase, bool flag);  //wall & trap
 
     // PhaseResourceManager.hpp
     std::vector<std::shared_ptr<Util::GameObject>> GetWall() const {

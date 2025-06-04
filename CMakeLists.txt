@@ -28,36 +28,14 @@ set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 list(TRANSFORM SRC_FILES PREPEND ${SRC_DIR}/)
 list(TRANSFORM INCLUDE_FILES PREPEND ${INCLUDE_DIR}/)
 
-# file(GLOB_RECURSE SRC_FILES src/*)
-# file(GLOB_RECURSE HEADER_FILES include/*)
+file(GLOB_RECURSE SRC_FILES src/*)
+file(GLOB_RECURSE HEADER_FILES include/*)
 
 add_executable(${PROJECT_NAME}
     ${SRC_DIR}/main.cpp
     ${SRC_FILES}
     ${HEADER_FILES}
-        include/BackgroundImage.hpp
-        include/AnimatedObjects.hpp
-        include/AppUtil.hpp
-        include/Objects.hpp
-        include/InvisibleWall.hpp
-        include/Main_Character.hpp
-        include/PhaseResourceManager.hpp
-        src/AnimatedObjects.cpp
-        src/AppUtil.cpp
-        src/Objects.cpp
-        src/MainCharacter.cpp
-        src/PhaseResourceManager.cpp
-        include/Trap.hpp
-        src/Trap.cpp
-        include/GoalFlag.hpp
-        include/Bounce.hpp
-        include/Balloon.hpp
-        include/WoodBox.hpp
-        src/Bounce.cpp
-        src/WoodBox.cpp
-        src/Balloon.cpp
-        include/Cloud.hpp
-        src/Cloud.cpp
+
 )
 
 if(MSVC)

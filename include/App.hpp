@@ -11,12 +11,12 @@
 #include "Util/Logger.hpp"
 #include "Util/Renderer.hpp"
 #include "Util/Time.hpp"
-#include "Objects.hpp"
+#include "Obj/Objects.hpp"
 #include "PhaseResourceManager.hpp"
-#include "AnimatedObjects.hpp"
-#include "Main_Character.hpp"
+#include "Obj/AnimatedObjects.hpp"
+#include "Obj/Main_Character.hpp"
 #include "AppUtil.hpp"
-#include "Balloon.hpp"
+#include "Obj/Balloon.hpp"
 
 class App {
 public:
@@ -59,6 +59,7 @@ public:
     void End(); // NOLINT(readability-convert-member-functions-to-static)
 
 private:
+    bool flag = true;
     void ValidTask();
 
     State m_CurrentState = State::START;
