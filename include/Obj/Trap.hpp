@@ -7,8 +7,8 @@
 
 class Trap : public Objects {
 public:
-    enum class Orientation { Down, Up, Left, Right };
-    Trap(const glm::vec2& coord, Orientation orientation)
+    enum class Direction { Down, Up, Left, Right };
+    Trap(const glm::vec2& coord, Direction direction)
     : Objects("")
     {
         SetCoordinate(coord);

@@ -10,10 +10,10 @@ void App::Start() {
 
     // 設置角色圖片
     m_madline = std::make_shared<MainCharacter>(RESOURCE_DIR "/Image/Character/standR.png");
-    m_madline->SetZIndex(90);  // 設置角色比雲朵低
+    m_madline->SetZIndex(100);
 
     // 設置背景
-    m_Phase = Phase::Phase03;
+    m_Phase = Phase::Phase00;
     m_PRM = std::make_shared<PhaseResourceManager>();  // 加載背景等
     m_PRM->NextPhase(m_Phase);
     AppUtil::LoadPhase(*this);
@@ -26,28 +26,39 @@ void App::Update() {
     //TODO: do your things here and delete this line <3
     float dt_s = Util::Time::GetDeltaTimeMs() * 0.001f;  // 毫秒轉秒
 
-    if (PressU) {
-        flag = false;
+    if (UbufferTime > 0.0f)
+        UbufferTime -= dt_s;
+    else
+        Ubuffer = false;
+    if (IbufferTime > 0.0f)
+        IbufferTime -= dt_s;
+    else
+        Ibuffer = false;
+
+    if (PressU && !Ubuffer) {
+        flag = flag ? false : true;
         AppUtil::removeObjects(*this);
         AppUtil::LoadPhase(*this);
-    }else if (PressI) {
-        flag = true;
-        AppUtil::removeObjects(*this);
-        AppUtil::LoadPhase(*this);
+        std::cout<<"正常模式："<<flag<<std::endl;
+        Ubuffer = true;
+        UbufferTime = 3.0f;
+    }else if (PressI && !Ibuffer) {
+        m_madline->ActivateMode();
+        Ibuffer = true;
+        IbufferTime = 3.0f;
     }
+
 
     m_Root.Update();
     m_madline->Draw();
 
     // Get the current position of the main character
     glm::vec2 currentPos = m_madline->GetCoordinate();
-
-
     std::string coordinatesText = "X: " + std::to_string(currentPos.x) + " Y: " + std::to_string(currentPos.y);
 
     // Use the renderer to draw the text on the screen
     // Assuming m_Root.AddText() is a function that adds text to be rendered on the screen
-    std::cout << coordinatesText << std::endl;
+    //std::cout << coordinatesText << std::endl;
 
     for (auto& child : m_PRM->GetChildren()) {
         if (auto trap = std::dynamic_pointer_cast<Trap>(child)) {

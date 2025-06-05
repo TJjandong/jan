@@ -52,9 +52,19 @@ public:
         m_Transform.translation = ResetCoordinate;
     }
 
-    void BounceJump();
+    void BounceJump() {
+        velocity_y = bounceforce;
+        ResetDash();
+    }
 
-    void ResetDash();
+    void ResetDash() {
+        Dashed = false;
+    }
+
+    void ActivateMode() {
+        CheatMode = CheatMode ? false : true;
+        std::cout<<"無限衝刺："<<CheatMode<<std::endl;
+    }
 
 private:
     glm::vec2 ResetCoordinate;
@@ -72,7 +82,7 @@ private:
     float bounceforce = 23.3f;
 
     float m_CoyoteTime = 0.0f; // 剩餘郊狼時間
-    const float COYOTE_TIME_TOLERANCE = 1.5f; // 最大容許時間（秒）
+    const float COYOTE_TIME_TOLERANCE = 0.3f; // 最大容許時間（秒）
 
     bool m_CPressedLastFrame = false;
     float m_JumpBufferTime = 0.0f;
@@ -86,6 +96,7 @@ private:
     // 鎖定時長，可調
     static constexpr float WALL_JUMP_LOCK_DURATION = 0.25f;
 
+    bool CheatMode = false;
 };
 
 #endif //MAIN_CHARACTER_HPP

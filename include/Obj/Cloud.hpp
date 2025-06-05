@@ -9,14 +9,14 @@ static constexpr glm::vec2 MoveRight = {2.0f, 0.0f};
 
 class Cloud : public Objects {
 public:
-    enum class Orientation { Left , Right };
-    Cloud(const glm::vec2& coord, Orientation orientation)
+    enum class Direction { Left , Right };
+    Cloud(const glm::vec2& coord, Direction direction)
     : Objects(RESOURCE_DIR"/Image/Character/cloud.png")
-    , m_orientation(orientation)
+    , m_direction(direction)
     {
         SetCoordinate(coord - glm::vec2{0.0f, 24.0f});
         SetScale(2.0f, 0.1f);
-        SetZIndex(100);
+        SetZIndex(90);
     }
 
     void ReturnMap();
@@ -24,11 +24,14 @@ public:
     void Move();
 
     bool IsRight() {
-        return m_orientation == Orientation::Right;
+        return m_direction == Direction::Right;
     }
 
+    glm::vec2 GetDelta() const{ return m_delta; }
+
 private:
-    Orientation m_orientation;
+    Direction m_direction;
+    glm::vec2 m_delta;
 };
 
 #endif //CLOUD_HPP

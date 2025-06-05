@@ -60,6 +60,12 @@ public:
 
 private:
     bool flag = true;
+
+    bool Ibuffer = false;
+    float IbufferTime = 3.0f;
+    bool Ubuffer = false;
+    float UbufferTime = 3.0f;
+
     void ValidTask();
 
     State m_CurrentState = State::START;

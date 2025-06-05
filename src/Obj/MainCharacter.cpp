@@ -70,6 +70,9 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
     if (!isDashing) {
         bool appliedInput = false;
 
+        if (CheatMode)                              //作弊模式
+            ResetDash();
+
         // 1) 只有在鎖定結束後，才允許按鍵改變 velocity_x
         if (m_WallJumpLockTimer <= 0.0f) {
             if (PressRIGHT) {
@@ -149,7 +152,6 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
         m_CoyoteTime = COYOTE_TIME_TOLERANCE;
     } else {
         // 減去經過的秒數 dt_s
-        float dt_s = Util::Time::GetDeltaTimeMs() * 0.001f;
         m_CoyoteTime = std::max(m_CoyoteTime - dt_s, 0.0f);
     }
 
@@ -169,9 +171,9 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
         m_WallJumpLockTimer = std::max(0.0f, m_WallJumpLockTimer - dt_s);
     }
 
-    if (m_JumpBuffered && !IsJumping && ((IsGround && m_CoyoteTime > 0.0f) || Isgrabbing)) {
+    if (m_JumpBuffered && !IsJumping && (m_CoyoteTime > 0.0f || Isgrabbing)) {
         // 地面跳
-        if (IsGround) {
+        if (IsGround || m_CoyoteTime > 0.0f) {
             velocity_y = Jumpforce;
         } else {
             // 壁跳
@@ -323,14 +325,5 @@ bool MainCharacter::RectOverlap(const glm::vec2 &a, const glm::vec2 &sizeA,
                                   const glm::vec2 &b, const glm::vec2 &sizeB) {
     return (a.x < b.x + sizeB.x && a.x + sizeA.x > b.x &&
             a.y < b.y + sizeB.y && a.y + sizeA.y > b.y);
-}
-
-void MainCharacter :: BounceJump() {
-    velocity_y = bounceforce;
-    ResetDash();
-}
-
-void MainCharacter :: ResetDash() {
-    Dashed = false;
 }
 

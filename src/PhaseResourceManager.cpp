@@ -45,7 +45,7 @@ void PhaseResourceManager::SetBoundary(const int phase, bool flag) {
                 if (flag == true) {
                     //Trap下
                     glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
-                    auto trap = std::make_shared<Trap>(pos, Trap::Orientation::Down );
+                    auto trap = std::make_shared<Trap>(pos, Trap::Direction::Down );
                     trap -> SetScale(1.0f, 0.33f);
                     m_Traps.push_back(trap);
                 }else {
@@ -57,7 +57,7 @@ void PhaseResourceManager::SetBoundary(const int phase, bool flag) {
             }else if (cell == 3) {
                 //Trap上
                 glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
-                auto trap = std::make_shared<Trap>(pos, Trap::Orientation::Up );
+                auto trap = std::make_shared<Trap>(pos, Trap::Direction::Up );
                 trap -> SetCoordinate(pos + glm::vec2(0.0f, 32.0f));
                 trap -> SetScale(1.0f, 0.33f);
                 m_Traps.push_back(trap);
@@ -80,12 +80,12 @@ void PhaseResourceManager::SetBoundary(const int phase, bool flag) {
             }else if (cell == 7) {
                 //Cloud左
                 glm::vec2 CloudPos = origin + glm::vec2(col * cellSize, -row * cellSize);
-                auto cloud = std::make_shared<Cloud>(CloudPos, Cloud::Orientation::Left);
+                auto cloud = std::make_shared<Cloud>(CloudPos, Cloud::Direction::Left);
                 m_Clouds.push_back(cloud);
             }else if (cell == 8) {
                 //Cloud右
                 glm::vec2 CloudPos = origin + glm::vec2(col * cellSize, -row * cellSize);
-                auto cloud = std::make_shared<Cloud>(CloudPos, Cloud::Orientation::Right);
+                auto cloud = std::make_shared<Cloud>(CloudPos, Cloud::Direction::Right);
                 m_Clouds.push_back(cloud);
             }else if (cell == 9) {
                 // 每一個 9 代表一個「下一關目標」
@@ -97,7 +97,7 @@ void PhaseResourceManager::SetBoundary(const int phase, bool flag) {
                 if (flag == true) {
                     //Trap左
                     glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
-                    auto trap = std::make_shared<Trap>(pos, Trap::Orientation::Left );
+                    auto trap = std::make_shared<Trap>(pos, Trap::Direction::Left );
                     trap -> SetScale(0.33f, 1.0f);
                     m_Traps.push_back(trap);
                 }else {
@@ -110,7 +110,7 @@ void PhaseResourceManager::SetBoundary(const int phase, bool flag) {
                 if (flag == true) {
                     //Trap右
                     glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
-                    auto trap = std::make_shared<Trap>(pos, Trap::Orientation::Right );
+                    auto trap = std::make_shared<Trap>(pos, Trap::Direction::Right );
                     trap -> SetCoordinate(pos + glm::vec2(32.0f, 0.0f));
                     trap -> SetScale(0.33f, 1.0f);
                     m_Traps.push_back(trap);
