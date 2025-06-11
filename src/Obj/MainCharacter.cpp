@@ -199,7 +199,8 @@ MainCharacter:: CollisionFlags MainCharacter::MoveX(const std::vector<std::share
     // 看看未來的位置，跟哪個物件撞
     auto hit = FindCollision(walls, testPos);
     if (hit) {
-        if (auto cloud = std::dynamic_pointer_cast<Cloud>(hit)) {
+        auto cloud = std::dynamic_pointer_cast<Cloud>(hit);
+        if (cloud) {
             pos.x += dx;
             SetCoordinate(pos);
             return flags;
@@ -232,8 +233,9 @@ MainCharacter:: CollisionFlags MainCharacter::MoveY(const std::vector<std::share
 
     auto hit = FindCollision(walls, testPos);
     if (hit) {
+        auto cloud = std::dynamic_pointer_cast<Cloud>(hit);
         if (dy > 0 ) {
-            if (auto cloud = std::dynamic_pointer_cast<Cloud>(hit)) {
+            if (cloud) {
                 // 空中時取消地面狀態
                 if (!flags.down) IsGround = false;
                 pos.y += dy;
@@ -242,10 +244,12 @@ MainCharacter:: CollisionFlags MainCharacter::MoveY(const std::vector<std::share
             }
             flags.up   = true;
         }
-        else        flags.down = true;
+        else flags.down = true;
 
-        velocity_y = 0.0f;
-
+        if (flags.down)
+            velocity_y = 0.0f;
+        else if (flags.up)
+            velocity_y -= 0.2f;
 
         // 著地時特別處理狀態
         if (flags.down) {
@@ -255,7 +259,7 @@ MainCharacter:: CollisionFlags MainCharacter::MoveY(const std::vector<std::share
             IsJumping  = false;
         }
 
-        if (auto cloud = std::dynamic_pointer_cast<Cloud>(hit)) {
+        if (cloud) {
             if (cloud->IsRight())
                 SetCoordinate(pos + MoveRight);
             else
@@ -301,29 +305,8 @@ std::shared_ptr<Util::GameObject> MainCharacter::FindCollision(
     return nullptr;
 }
 
-bool MainCharacter::IfCollidesObject(const std::shared_ptr<Objects>& other) const {
-    glm::vec2 posA = GetCoordinate() + glm::vec2{0, 10};
-    glm::vec2 sizeA = {30, 27};
-
-    glm::vec2 posB = other->GetCoordinate(); // 另一個物件的座標
-    glm::vec2 sizeB = other->m_Transform.scale * 48.0f;
-
-    return RectOverlap(posA, sizeA, posB, sizeB);
-}
-
-bool MainCharacter::IfCollidesObject(const std::shared_ptr<AnimatedObjects>& other) const {
-    glm::vec2 posA = GetCoordinate() + glm::vec2{0, 10};
-    glm::vec2 sizeA = {30.0f, 27.0f};
-
-    glm::vec2 posB = other->GetCoordinate(); // 另一個物件的座標
-    glm::vec2 sizeB = other->m_Transform.scale * 48.0f;
-
-    return RectOverlap(posA, sizeA, posB, sizeB);
-}
-
 bool MainCharacter::RectOverlap(const glm::vec2 &a, const glm::vec2 &sizeA,
                                   const glm::vec2 &b, const glm::vec2 &sizeB) {
-    return (a.x < b.x + sizeB.x && a.x + sizeA.x > b.x &&
-            a.y < b.y + sizeB.y && a.y + sizeA.y > b.y);
+    return (a < b + sizeB && a + sizeA > b);
 }
 

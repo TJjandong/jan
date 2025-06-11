@@ -8,6 +8,14 @@
 #include "Util/Image.hpp"
 #include "Util/GameObject.hpp"
 
+//加上 inline：告訴編譯器「這個函式可以在多個翻譯單元都定義，連結器會幫你合併成一個實體，不會出現多重定義錯誤」
+inline bool operator>(const glm::vec2& A, const glm::vec2& B){
+    return A.x > B.x && A.y > B.y;
+}
+inline bool operator<(const glm::vec2& A, const glm::vec2& B){
+    return A.x < B.x && A.y < B.y;
+}
+
 class Objects : public Util::GameObject {
 public:
     explicit Objects(const std::string& ImagePath);

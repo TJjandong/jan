@@ -11,12 +11,11 @@
 #include "Util/Logger.hpp"
 #include "Util/Renderer.hpp"
 #include "Util/Time.hpp"
-#include "Obj/Objects.hpp"
+
 #include "PhaseResourceManager.hpp"
-#include "Obj/AnimatedObjects.hpp"
 #include "Obj/Main_Character.hpp"
 #include "AppUtil.hpp"
-#include "Obj/Balloon.hpp"
+#include "VicUI.hpp"
 
 class App {
 public:
@@ -38,16 +37,7 @@ public:
         Phase08,
         Phase09,
         Phase10,
-        Phase11,
-        Phase12,
-        Phase13,
-        Phase14,
-        Phase15,
-        Phase16,
-        Phase17,
-        Phase18,
-        Phase19,
-        Phase20
+        Phase11
     };
 
     State GetCurrentState() const { return m_CurrentState; }
@@ -66,6 +56,8 @@ private:
     bool Ubuffer = false;
     float UbufferTime = 3.0f;
 
+    int DeathTimes = 0;
+    float TotalPlayTime = 0;
     void ValidTask();
 
     State m_CurrentState = State::START;
@@ -73,15 +65,10 @@ private:
     Util::Renderer m_Root;
     Phase m_Phase = Phase::Phase00;
 
-    std::shared_ptr<MainCharacter> m_madline;
-
-    //道具物件交給PhaseResource生成
-
-    std::shared_ptr<AnimatedObjects> m_strawberry;
-    std::shared_ptr<AnimatedObjects> m_FlyingStrawberry;
-    std::shared_ptr<AnimatedObjects> m_key;
-
     std::shared_ptr<PhaseResourceManager> m_PRM;
+    std::shared_ptr<MainCharacter> m_madline;
+    std::unique_ptr<VictoryUI> m_victoryUI;
+    //道具物件交給PhaseResource生成
 
     bool m_EnterDown = false;
 

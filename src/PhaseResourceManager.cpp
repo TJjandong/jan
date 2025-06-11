@@ -55,12 +55,20 @@ void PhaseResourceManager::SetBoundary(const int phase, bool flag) {
                     m_Walls.push_back(wall);
                 }
             }else if (cell == 3) {
-                //Trap上
-                glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
-                auto trap = std::make_shared<Trap>(pos, Trap::Direction::Up );
-                trap -> SetCoordinate(pos + glm::vec2(0.0f, 32.0f));
-                trap -> SetScale(1.0f, 0.33f);
-                m_Traps.push_back(trap);
+                if (flag == true) {
+                    //Trap上
+                    glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
+                    auto trap = std::make_shared<Trap>(pos, Trap::Direction::Up );
+                    trap -> SetCoordinate(pos + glm::vec2(0.0f, 32.0f));
+                    trap -> SetScale(1.0f, 0.33f);
+                    m_Traps.push_back(trap);
+                }else {
+                    glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
+                    auto wall = std::make_shared<InvisibleWall>(pos);
+                    wall -> SetCoordinate(pos + glm::vec2(0.0f, 32.0f));
+                    wall -> SetScale(1.0f, 0.33f);
+                    m_Walls.push_back(wall);
+                }
             }else if (cell == 4) {
                 // 每一個 4 代表一個「彈簧」
                 glm::vec2 BouncePos = origin + glm::vec2(col * cellSize, -row * cellSize);

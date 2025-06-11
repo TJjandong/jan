@@ -25,6 +25,7 @@ set(INCLUDE_FILES
         Balloon.hpp
         WoodBox.hpp
         Cloud.hpp
+        VicUI.hpp
 )
 
 set(TEST_FILES

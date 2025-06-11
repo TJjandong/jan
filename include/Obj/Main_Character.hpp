@@ -1,15 +1,14 @@
 #ifndef MAIN_CHARACTER_HPP
 #define MAIN_CHARACTER_HPP
-#include "Objects.hpp"
-#include "AnimatedObjects.hpp"
+
 #include "util/Input.hpp"
 #include "Util/Time.hpp"
+
+#include "Objects.hpp"
+#include "AnimatedObjects.hpp"
 #include "InvisibleWall.hpp"
 #include "WoodBox.hpp"
 #include "Cloud.hpp"
-#include <string>
-#include <iostream>
-#include <cmath>
 
 class MainCharacter : public Objects {
 public:
@@ -33,9 +32,18 @@ public:
         const glm::vec2& testPos
     );
 
-    bool IfCollidesObject(const std::shared_ptr<Objects>& other) const;
+    template<typename T>
+    bool IfCollidesObject(const std::shared_ptr<T>& other) const {
+        // 角色碰撞框：腳底往上 10，寬30，高27
+        glm::vec2 posA  = GetCoordinate() + glm::vec2{0, 10};
+        glm::vec2 sizeA = {30.0f, 27.0f};
 
-    bool IfCollidesObject(const std::shared_ptr<AnimatedObjects>& other) const;
+        // 目標物件的 AABB
+        glm::vec2 posB  = other->GetCoordinate();
+        glm::vec2 sizeB = other->m_Transform.scale * 48.0f;
+
+        return RectOverlap(posA, sizeA, posB, sizeB);
+    }
 
     void movement(const std::vector<std::shared_ptr<Util::GameObject>>& walls);
 

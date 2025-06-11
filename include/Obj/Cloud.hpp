@@ -15,8 +15,8 @@ public:
     , m_direction(direction)
     {
         SetCoordinate(coord - glm::vec2{0.0f, 24.0f});
-        SetScale(2.0f, 0.1f);
-        SetZIndex(90);
+        SetScale(2.0f, 0.5f);
+        SetZIndex(70);
     }
 
     void ReturnMap();

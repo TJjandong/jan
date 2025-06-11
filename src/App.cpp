@@ -7,16 +7,17 @@
 void App::Start() {
     LOG_TRACE("Start");
 
-
     // 設置角色圖片
     m_madline = std::make_shared<MainCharacter>(RESOURCE_DIR "/Image/Character/standR.png");
-    m_madline->SetZIndex(100);
+    m_madline->SetZIndex(80);
 
     // 設置背景
     m_Phase = Phase::Phase00;
     m_PRM = std::make_shared<PhaseResourceManager>();  // 加載背景等
     m_PRM->NextPhase(m_Phase);
     AppUtil::LoadPhase(*this);
+
+    m_victoryUI = std::make_unique<VictoryUI>(m_Root);
 
     m_CurrentState = State::UPDATE;
 }
@@ -25,6 +26,8 @@ void App::Update() {
 
     //TODO: do your things here and delete this line <3
     float dt_s = Util::Time::GetDeltaTimeMs() * 0.001f;  // 毫秒轉秒
+    TotalPlayTime += dt_s;
+    //std::cout << TotalPlayTime << std::endl;
 
     if (UbufferTime > 0.0f)
         UbufferTime -= dt_s;
@@ -48,17 +51,28 @@ void App::Update() {
         IbufferTime = 3.0f;
     }
 
+    if (m_Phase == Phase11) {
+        static bool uiVisible = false;
+        // 角色 X 轴在指定范围就算“到达”了
+        bool inZone = (m_madline->GetCoordinate().x > -100.0f &&
+                       m_madline->GetCoordinate().x <  100.0f);
+        if (inZone && !uiVisible) {
+            m_victoryUI->Show(TotalPlayTime, DeathTimes);
+            uiVisible = true;
+        } else if (!inZone && uiVisible) {
+            m_victoryUI->Hide();
+            uiVisible = false;
+        }
+    }
 
     m_Root.Update();
     m_madline->Draw();
 
-    // Get the current position of the main character
+    /* Get the current position of the main character
     glm::vec2 currentPos = m_madline->GetCoordinate();
     std::string coordinatesText = "X: " + std::to_string(currentPos.x) + " Y: " + std::to_string(currentPos.y);
-
-    // Use the renderer to draw the text on the screen
-    // Assuming m_Root.AddText() is a function that adds text to be rendered on the screen
-    //std::cout << coordinatesText << std::endl;
+    std::cout << coordinatesText << std::endl;
+    */
 
     for (auto& child : m_PRM->GetChildren()) {
         if (auto trap = std::dynamic_pointer_cast<Trap>(child)) {
@@ -66,6 +80,7 @@ void App::Update() {
                 std::cout << "踩到陷阱了" << std::endl;
                 AppUtil::removeObjects(*this);
                 AppUtil::LoadPhase(*this);
+                DeathTimes++;
             }
         }
         if (auto goal = std::dynamic_pointer_cast<Goal>(child)) {
