@@ -38,6 +38,7 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
 
     // 處理衝刺輸入緩衝（X鍵）
     if ((xJustPressed || m_DashBuffered) && !Dashed) {
+        bool appliedInput = false;
         isDashing = true;
         dashTimer = dashDuration;
         Dashed = true;
@@ -45,14 +46,31 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
         velocity_y = 0.0f;
         const float Dashforce = 30.0f;
 
-        if (PressUP)
+        if (PressUP) {
             velocity_y = Dashforce;
-        if (PressDOWN)
+            appliedInput = true;
+        }else if (PressDOWN) {
             velocity_y = -Dashforce;
-        if (PressRIGHT)
+            appliedInput = true;
+        }
+
+        if (PressRIGHT) {
             velocity_x = Dashforce;
-        if (PressLEFT)
+            dir = Direction::Right;
+            appliedInput = true;
+        }else if (PressLEFT) {
             velocity_x = -Dashforce;
+            dir = Direction::Left;
+            appliedInput = true;
+        }
+
+        //若衝刺
+        if (!appliedInput) {
+            if (dir == Direction::Right)
+                velocity_x = Dashforce;
+            else if (dir == Direction::Left)
+                velocity_x = -Dashforce;
+        }
 
         IsJumping = true;
     }
@@ -77,9 +95,11 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
         if (m_WallJumpLockTimer <= 0.0f) {
             if (PressRIGHT) {
                 velocity_x += acceleration;
+                dir = Direction::Right;
                 appliedInput = true;
             } else if (PressLEFT) {
                 velocity_x -= acceleration;
+                dir = Direction::Left;
                 appliedInput = true;
             }
 
@@ -137,14 +157,13 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
 
     // 碰撞與移動拆成兩步：水平、再垂直
     auto hFlags = MoveX(walls, velocity_x);
+    // 更新新的垂直位置
+    auto vFlags = MoveY(walls, velocity_y);
     // 更新抓牆狀態
     nearLeftWall = hFlags.left;
     nearRightWall = hFlags.right;
     Isgrabbing     = (nearLeftWall || nearRightWall) && !IsGround;
     if (Isgrabbing) IsJumping = false;
-
-    // 更新新的垂直位置
-    auto vFlags = MoveY(walls, velocity_y);
 
 
     // --- 郊狼時間（Coyote Time）更新 ---
@@ -178,7 +197,13 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
         } else {
             // 壁跳
             velocity_y = Jumpforce;
-            velocity_x = (nearLeftWall ? +Jumpforce : -Jumpforce);
+            if (nearLeftWall) {
+                velocity_x = Jumpforce;
+                dir = Direction::Right;
+            }else if (nearRightWall) {
+                velocity_x = -Jumpforce;
+                dir = Direction::Left;
+            }
 
             m_WallJumpLockTimer = WALL_JUMP_LOCK_DURATION;
         }
@@ -187,6 +212,8 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
         m_JumpBuffered= false;
         m_CoyoteTime  = 0.0f;
     }
+
+    SetMoveImage();
 
 }
 
@@ -310,3 +337,25 @@ bool MainCharacter::RectOverlap(const glm::vec2 &a, const glm::vec2 &sizeA,
     return (a < b + sizeB && a + sizeA > b);
 }
 
+void MainCharacter::SetMoveImage() {
+    if (Dashed && Isgrabbing && dir == Direction::Right && velocity_y < -0.05f)
+        SetImage(RESOURCE_DIR "/Image/Character/climbDashR.png");
+    else if (Dashed && Isgrabbing && dir == Direction::Left && velocity_y < -0.05f)
+        SetImage(RESOURCE_DIR "/Image/Character/climbDashL.png");
+    else if (Dashed && dir == Direction::Right)
+        SetImage(RESOURCE_DIR "/Image/Character/dashR.png");
+    else if (Dashed && dir == Direction::Left)
+        SetImage(RESOURCE_DIR "/Image/Character/dashL.png");
+    else if (!Dashed && Isgrabbing && dir == Direction::Right && velocity_y < -0.05f)
+        SetImage(RESOURCE_DIR "/Image/Character/climbR.png");
+    else if (!Dashed && Isgrabbing && dir == Direction::Left && velocity_y < -0.05f)
+        SetImage(RESOURCE_DIR "/Image/Character/climbL.png");
+    else if (IsJumping && dir == Direction::Right)
+        SetImage(RESOURCE_DIR "/Image/Character/jumpORwalk03R.png");
+    else if (IsJumping && dir == Direction::Left)
+        SetImage(RESOURCE_DIR "/Image/Character/jumpORwalk03L.png");
+    else if (dir == Direction::Right)
+        SetImage(RESOURCE_DIR "/Image/Character/standR.png");
+    else if (dir == Direction::Left)
+        SetImage(RESOURCE_DIR "/Image/Character/standL.png");
+}

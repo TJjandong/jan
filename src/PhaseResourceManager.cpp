@@ -46,12 +46,12 @@ void PhaseResourceManager::SetBoundary(const int phase, bool flag) {
                     //Trap下
                     glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
                     auto trap = std::make_shared<Trap>(pos, Trap::Direction::Down );
-                    trap -> SetScale(1.0f, 0.33f);
+                    trap -> SetScale(1.0f, 0.2f);
                     m_Traps.push_back(trap);
                 }else {
                     glm::vec2 position = origin + glm::vec2(col * cellSize, -row * cellSize);
                     auto wall = std::make_shared<InvisibleWall>(position);
-                    wall -> SetScale(1.0f, 0.33f);
+                    wall -> SetScale(1.0f, 0.2f);
                     m_Walls.push_back(wall);
                 }
             }else if (cell == 3) {
@@ -59,14 +59,14 @@ void PhaseResourceManager::SetBoundary(const int phase, bool flag) {
                     //Trap上
                     glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
                     auto trap = std::make_shared<Trap>(pos, Trap::Direction::Up );
-                    trap -> SetCoordinate(pos + glm::vec2(0.0f, 32.0f));
-                    trap -> SetScale(1.0f, 0.33f);
+                    trap -> SetCoordinate(pos + glm::vec2(0.0f, 38.4f));
+                    trap -> SetScale(1.0f, 0.2f);
                     m_Traps.push_back(trap);
                 }else {
                     glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
                     auto wall = std::make_shared<InvisibleWall>(pos);
-                    wall -> SetCoordinate(pos + glm::vec2(0.0f, 32.0f));
-                    wall -> SetScale(1.0f, 0.33f);
+                    wall -> SetCoordinate(pos + glm::vec2(0.0f, 38.4f));
+                    wall -> SetScale(1.0f, 0.2f);
                     m_Walls.push_back(wall);
                 }
             }else if (cell == 4) {
@@ -106,12 +106,12 @@ void PhaseResourceManager::SetBoundary(const int phase, bool flag) {
                     //Trap左
                     glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
                     auto trap = std::make_shared<Trap>(pos, Trap::Direction::Left );
-                    trap -> SetScale(0.33f, 1.0f);
+                    trap -> SetScale(0.2f, 1.0f);
                     m_Traps.push_back(trap);
                 }else {
                     glm::vec2 position = origin + glm::vec2(col * cellSize, -row * cellSize);
                     auto wall = std::make_shared<InvisibleWall>(position);
-                    wall -> SetScale(0.33f, 1.0f);
+                    wall -> SetScale(0.2f, 1.0f);
                     m_Walls.push_back(wall);
                 }
             }else if (cell == 11) {
@@ -119,14 +119,14 @@ void PhaseResourceManager::SetBoundary(const int phase, bool flag) {
                     //Trap右
                     glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
                     auto trap = std::make_shared<Trap>(pos, Trap::Direction::Right );
-                    trap -> SetCoordinate(pos + glm::vec2(32.0f, 0.0f));
-                    trap -> SetScale(0.33f, 1.0f);
+                    trap -> SetCoordinate(pos + glm::vec2(38.4f, 0.0f));
+                    trap -> SetScale(0.2f, 1.0f);
                     m_Traps.push_back(trap);
                 }else {
                     glm::vec2 pos = origin + glm::vec2(col * cellSize, -row * cellSize);
                     auto wall = std::make_shared<InvisibleWall>(pos);
-                    wall -> SetCoordinate(pos + glm::vec2(32.0f, 0.0f));
-                    wall -> SetScale(0.33f, 1.0f);
+                    wall -> SetCoordinate(pos + glm::vec2(38.4f, 0.0f));
+                    wall -> SetScale(0.2f, 1.0f);
                     m_Walls.push_back(wall);
                 }
             }

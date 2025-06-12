@@ -10,6 +10,11 @@
 #include "WoodBox.hpp"
 #include "Cloud.hpp"
 
+enum class Direction {
+    Left,
+    Right
+};
+
 class MainCharacter : public Objects {
 public:
     MainCharacter(const std::string& ImagePath) : Objects(ImagePath) {}
@@ -34,9 +39,9 @@ public:
 
     template<typename T>
     bool IfCollidesObject(const std::shared_ptr<T>& other) const {
-        // 角色碰撞框：腳底往上 10，寬30，高27
-        glm::vec2 posA  = GetCoordinate() + glm::vec2{0, 10};
-        glm::vec2 sizeA = {30.0f, 27.0f};
+        // 角色碰撞框：腳底往上 4，寬33，高26
+        glm::vec2 posA  = GetCoordinate() + glm::vec2{7, 4};
+        glm::vec2 sizeA = {33.0f, 26.0f};
 
         // 目標物件的 AABB
         glm::vec2 posB  = other->GetCoordinate();
@@ -74,7 +79,10 @@ public:
         std::cout<<"無限衝刺："<<CheatMode<<std::endl;
     }
 
+    void SetMoveImage();
+
 private:
+    Direction dir = Direction::Right;
     glm::vec2 ResetCoordinate;
     float velocity_x = 0;
     float velocity_y = 0;
