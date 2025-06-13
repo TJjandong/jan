@@ -54,8 +54,6 @@ public:
 
     static bool RectOverlap(const glm::vec2 &a, const glm::vec2 &sizeA, const glm::vec2 &b, const glm::vec2 &sizeB);
 
-    void KillInstant();
-
     void SetSpawnPoint(const glm::vec2 &spawn) {
         SetCoordinate(spawn);
         ResetCoordinate = spawn;
@@ -93,12 +91,12 @@ private:
     bool Isgrabbing = false;
     bool nearLeftWall = false;
     bool nearRightWall = false;
-    float dashTimer = 0.0f;           // 單位：毫秒
-    const float dashDuration = 250.0f; // 衝刺持續 200 毫秒，可依需求調整
+    float dashTimer = 0.0f;           // 單位：秒
+    const float dashDuration = 0.25f; // 衝刺持續 0.25 秒，可依需求調整
     float bounceforce = 23.3f;
 
     float m_CoyoteTime = 0.0f; // 剩餘郊狼時間
-    const float COYOTE_TIME_TOLERANCE = 0.3f; // 最大容許時間（秒）
+    const float COYOTE_TIME_TOLERANCE = 0.2f; // 最大容許時間（秒）
 
     bool m_CPressedLastFrame = false;
     float m_JumpBufferTime = 0.0f;
@@ -106,6 +104,8 @@ private:
     bool m_JumpBuffered = false;
     bool m_XPressedLastFrame = false;
     bool m_DashBuffered = false;
+    int WalkFrames = 0;
+    float ChangeWalkTime = 0.1f;
 
     // 鎖定左右鍵的計時器（秒）
     float m_WallJumpLockTimer = 0.0f;

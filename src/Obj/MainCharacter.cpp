@@ -10,19 +10,18 @@
 
 void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>>& walls) {
     // 定義移動與物理參數
-    const float max_speed = 4.3f;
-    const float acceleration = 6.0f;
+    const float max_speed = 5.0f;
+    const float acceleration = 2.0f;
     const float friction = 4.0f;
-    const float Jumpforce = 17.5f;         // 跳躍時的初速度
-    const float Dashforce = 30.0f;           // 衝刺時的初速度
+    const float Jumpforce = 16.5f;         // 跳躍時的初速度
+    const float Dashforce = 25.0f;           // 衝刺時的初速度
     float Gravity = 0.6f;            // 重力加速度，每幀施加
-    const float max_fall_speed = -max_speed * 2.1f;  // 限制垂直下落速度
+    const float max_fall_speed = -max_speed * 1.8f;  // 限制垂直下落速度
     nearLeftWall  = false;
     nearRightWall = false;
 
     // 時間
-    float dt_ms = Util::Time::GetDeltaTimeMs();
-    float dt_s  = dt_ms * 0.001f;
+    float dt_s = Util::Time::GetDeltaTimeMs() * 0.001f;
 
     // 讀取按鍵邊緣
     bool cPressedNow   = PressC;
@@ -77,7 +76,7 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
 
     // 更新衝刺計時器：當處於衝刺狀態時不受 max_speed 限制
     if (isDashing) {
-        dashTimer -= dt_ms;
+        dashTimer -= dt_s;
         if (dashTimer <= 0) {
             isDashing = false;
             // 衝刺結束時可以選擇重置部分狀態
@@ -125,33 +124,32 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
             }
         }
 
-        // 當角色不在地面時施加重力
-        if (!IsGround) {
-            if (velocity_y > 2.5f)
-                velocity_y -= Gravity;
-            if (velocity_y <= 2.5f && velocity_y >= -2.5f)
-                velocity_y -= Gravity - 0.25f;
-            else
-                velocity_y -= Gravity;
 
-            if (velocity_y < max_fall_speed)
-                velocity_y = max_fall_speed;
+        if (velocity_y > 4.0f)
+            velocity_y -= Gravity;
+        if (velocity_y <= 4.0f && velocity_y >= -4.0f)
+            velocity_y -= Gravity - 0.2f;
+        else
+            velocity_y -= Gravity;
 
-            if (Isgrabbing) {
-                if (velocity_y < 0) {
-                    if (velocity_y > max_fall_speed*0.4f)
-                        velocity_y -= Gravity * 0.088f;
-                    else
-                        velocity_y = max_fall_speed*0.4f;
-                }
+        if (velocity_y < max_fall_speed)
+            velocity_y = max_fall_speed;
+
+        if (Isgrabbing) {
+            if (velocity_y < 0) {
+                if (velocity_y > max_fall_speed*0.4f)
+                    velocity_y -= Gravity * 0.088f;
+                else
+                    velocity_y = max_fall_speed*0.4f;
             }
         }
+
     } else {
         Gravity = 0.0f;
-        if (velocity_x > max_speed) velocity_x -= friction * 0.6f;
-        if (velocity_x < -max_speed) velocity_x += friction * 0.6f;
-        if (velocity_y > max_speed) velocity_y -= friction * 0.7f;
-        if (velocity_y < max_fall_speed) velocity_y += friction * 0.7f;
+        if (velocity_x > max_speed) velocity_x -= friction * 0.65f;
+        if (velocity_x < -max_speed) velocity_x += friction * 0.65f;
+        if (velocity_y > max_speed) velocity_y -= friction * 0.8f;
+        if (velocity_y < max_fall_speed) velocity_y += friction * 0.8f;
     }
 
 
@@ -207,14 +205,12 @@ void MainCharacter::movement(const std::vector<std::shared_ptr<Util::GameObject>
 
             m_WallJumpLockTimer = WALL_JUMP_LOCK_DURATION;
         }
-        IsGround      = false;
         IsJumping     = true;
         m_JumpBuffered= false;
         m_CoyoteTime  = 0.0f;
     }
 
     SetMoveImage();
-
 }
 
 MainCharacter:: CollisionFlags MainCharacter::MoveX(const std::vector<std::shared_ptr<Util::GameObject>>& walls, float dx) {
@@ -263,7 +259,6 @@ MainCharacter:: CollisionFlags MainCharacter::MoveY(const std::vector<std::share
         auto cloud = std::dynamic_pointer_cast<Cloud>(hit);
         if (dy > 0 ) {
             if (cloud) {
-                // 空中時取消地面狀態
                 if (!flags.down) IsGround = false;
                 pos.y += dy;
                 SetCoordinate(pos);
@@ -338,6 +333,7 @@ bool MainCharacter::RectOverlap(const glm::vec2 &a, const glm::vec2 &sizeA,
 }
 
 void MainCharacter::SetMoveImage() {
+    float dt_s = Util::Time::GetDeltaTimeMs() * 0.001f;
     if (Dashed && Isgrabbing && dir == Direction::Right && velocity_y < -0.05f)
         SetImage(RESOURCE_DIR "/Image/Character/climbDashR.png");
     else if (Dashed && Isgrabbing && dir == Direction::Left && velocity_y < -0.05f)
@@ -346,14 +342,58 @@ void MainCharacter::SetMoveImage() {
         SetImage(RESOURCE_DIR "/Image/Character/dashR.png");
     else if (Dashed && dir == Direction::Left)
         SetImage(RESOURCE_DIR "/Image/Character/dashL.png");
-    else if (!Dashed && Isgrabbing && dir == Direction::Right && velocity_y < -0.05f)
-        SetImage(RESOURCE_DIR "/Image/Character/climbR.png");
-    else if (!Dashed && Isgrabbing && dir == Direction::Left && velocity_y < -0.05f)
-        SetImage(RESOURCE_DIR "/Image/Character/climbL.png");
     else if (IsJumping && dir == Direction::Right)
         SetImage(RESOURCE_DIR "/Image/Character/jumpORwalk03R.png");
     else if (IsJumping && dir == Direction::Left)
         SetImage(RESOURCE_DIR "/Image/Character/jumpORwalk03L.png");
+    else if (!Dashed && Isgrabbing && dir == Direction::Right)
+        SetImage(RESOURCE_DIR "/Image/Character/climbR.png");
+    else if (!Dashed && Isgrabbing && dir == Direction::Left)
+        SetImage(RESOURCE_DIR "/Image/Character/climbL.png");
+    else if (IsGround && PressRIGHT) {
+        if (ChangeWalkTime <= 0.0f) {
+            WalkFrames++;
+            if (WalkFrames > 3)
+                WalkFrames = 0;
+            switch (WalkFrames) {
+                case 0:
+                    SetImage(RESOURCE_DIR "/Image/Character/standR.png");
+                break;
+                case 1:
+                    SetImage(RESOURCE_DIR "/Image/Character/walk02R.png");
+                break;
+                case 2:
+                    SetImage(RESOURCE_DIR "/Image/Character/jumpORwalk03R.png");
+                break;
+                case 3:
+                    SetImage(RESOURCE_DIR "/Image/Character/walk04R.png");
+            }
+            ChangeWalkTime = 0.1f;
+        }else
+            ChangeWalkTime -= dt_s;
+    }
+    else if (IsGround && PressLEFT) {
+        if (ChangeWalkTime <= 0.0f) {
+            WalkFrames++;
+            if (WalkFrames > 3)
+                WalkFrames = 0;
+            switch (WalkFrames) {
+                case 0:
+                    SetImage(RESOURCE_DIR "/Image/Character/standL.png");
+                break;
+                case 1:
+                    SetImage(RESOURCE_DIR "/Image/Character/walk02L.png");
+                break;
+                case 2:
+                    SetImage(RESOURCE_DIR "/Image/Character/jumpORwalk03L.png");
+                break;
+                case 3:
+                    SetImage(RESOURCE_DIR "/Image/Character/walk04L.png");
+            }
+            ChangeWalkTime = 0.1f;
+        }else
+            ChangeWalkTime -= dt_s;
+    }
     else if (dir == Direction::Right)
         SetImage(RESOURCE_DIR "/Image/Character/standR.png");
     else if (dir == Direction::Left)

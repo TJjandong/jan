@@ -58,7 +58,6 @@ private:
 
     int DeathTimes = 0;
     float TotalPlayTime = 0;
-    void ValidTask();
 
     State m_CurrentState = State::START;
 
