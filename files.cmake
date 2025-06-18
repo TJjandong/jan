@@ -9,6 +9,7 @@ set(SRC_FILES
         Bounce.cpp
         Balloon.cpp
         Cloud.cpp
+        VicUI.cpp
 )
 
 set(INCLUDE_FILES
