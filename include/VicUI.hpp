@@ -9,7 +9,7 @@ class VictoryUI : public Objects{
 public:
     // 傳入渲染根節點，用於 AddChild/RemoveChild
     VictoryUI(Util::Renderer& root)
-    : Objects(RESOURCE_DIR "/Victory/VicMenu.png")
+    : Objects("")
     , m_root(root) {
         SetZIndex(100);
     }

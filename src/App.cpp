@@ -12,7 +12,7 @@ void App::Start() {
     m_madline->SetZIndex(80);
 
     // 設置背景
-    m_Phase = Phase::Phase00;
+    m_Phase = Phase::Phase11;
     m_PRM = std::make_shared<PhaseResourceManager>();  // 加載背景等
     m_PRM->NextPhase(m_Phase);
     AppUtil::LoadPhase(*this);

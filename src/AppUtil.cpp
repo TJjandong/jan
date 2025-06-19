@@ -23,7 +23,7 @@ namespace AppUtil {
         app.m_Root.AddChildren(app.m_PRM->GetChildren());  // 背景、牆、陷阱、目標 :contentReference[oaicite:3]{index=3}
 
         switch (phaseIndex) {
-            case app.Phase01:
+            case App::Phase01:
                 app.m_madline->SetSpawnPoint({-300.0f, -300.0f});
                 break;
             case app.Phase02:
